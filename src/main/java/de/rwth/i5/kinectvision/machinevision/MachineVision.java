@@ -3,6 +3,7 @@ package de.rwth.i5.kinectvision.machinevision;
 import boofcv.struct.image.GrayF32;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F32;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -12,11 +13,20 @@ import java.util.ArrayList;
  * Class handling the kinect streams to determine the positions of humans and robots
  */
 public class MachineVision implements FrameHandler {
-    //TODO: Implement
     private FrameSource frameSource;
+    public static final int minDistance = -10;
+    public static final float scaleFactor = 0.0021f;
 
     public MachineVision(FrameSource frameSource) {
         this.frameSource = frameSource;
+    }
+
+    public static Point3D_F32 fromKinectToXYZ(int i, int j, int depth) {
+
+        float x = (i - 512 / 2) * (depth + minDistance) * scaleFactor;
+        float y = (j - 424 / 2) * (depth + minDistance) * scaleFactor;
+        int z = depth;
+        return new Point3D_F32(x, y, z);
     }
 
     /**
