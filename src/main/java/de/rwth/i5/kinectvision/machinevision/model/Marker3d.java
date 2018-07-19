@@ -1,6 +1,5 @@
 package de.rwth.i5.kinectvision.machinevision.model;
 
-import georegression.struct.point.Point3D_F32;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +8,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Marker3d {
-    Point3D_F32 centerPosition;
+    int x, y, z;
     long id;
+
+    public Marker3d() {
+
+    }
 }
