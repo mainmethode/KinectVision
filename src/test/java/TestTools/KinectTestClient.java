@@ -4,7 +4,7 @@ package TestTools;
 import de.rwth.i5.kinectvision.machinevision.FiducialDetectionResult;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
-import de.rwth.i5.kinectvision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import georegression.struct.point.Point2D_F64;
 import lombok.extern.slf4j.Slf4j;

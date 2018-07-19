@@ -1,7 +1,7 @@
 package de.rwth.i5.kinectvision.machinevision;
 
 import boofcv.struct.image.GrayF32;
-import de.rwth.i5.kinectvision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import georegression.struct.point.Point2D_F64;
 
 import java.awt.*;

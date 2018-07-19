@@ -1,6 +1,6 @@
 package TestTools;
 
-import de.rwth.i5.kinectvision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import org.nustaq.serialization.FSTConfiguration;
 
 import java.io.File;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 /**
  * Class for storing the generated Kinect data in a file
@@ -76,7 +75,8 @@ public class KinectDataStore {
      * @return the byte array containing the data or null if something bad happened
      */
     public static byte[] readBinaryDataFromResources(String fileName) {
-        File file = new File(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(fileName), "The provided file is null.").getFile());
+//        File file = new File(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(fileName), "The provided file is null.").getFile());
+        File file = new File(fileName);
         try {
             return Files.readAllBytes(file.toPath());
         } catch (IOException e) {

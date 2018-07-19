@@ -6,6 +6,7 @@ import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.GrayS16;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,8 @@ public class FiducialFinder {
         return detectionList;
     }
 
-    @Deprecated
+//    @Deprecated
+
     /**
      * Converts a byte array to a BufferedImage
      *
@@ -63,8 +65,8 @@ public class FiducialFinder {
      * @param h
      * @return
      */
-    static BufferedImage toBufIm(byte[] data, int w, int h) {
-        BufferedImage res = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+    public static BufferedImage toBufIm(byte[] data, int w, int h) {
+        BufferedImage res = new BufferedImage(w, h, BufferedImage.TYPE_USHORT_GRAY);
         IntBuffer intBuf =
                 ByteBuffer.wrap(data)
                         .order(ByteOrder.BIG_ENDIAN)
@@ -73,7 +75,7 @@ public class FiducialFinder {
         intBuf.get(array);
 
         for (int i = 0; i < array.length; i++) {
-            res.setRGB(i % w, (int) (i / w), array[i]);
+            res.setRGB(i % w, (int) (i / w), Integer.reverse(array[i]));
         }
         return res;
     }
@@ -92,6 +94,18 @@ public class FiducialFinder {
         for (int i = 0; i < w * h; i++) {
             res.set(i % w, (int) (i / w), data[i] * 2);
         }
+
+
         return res;
     }
+
+    public static GrayS16 toGrayS16Image(short[] data, int w, int h) {
+
+        GrayS16 res = new GrayS16(w, h);
+        for (int i = 0; i < w * h; i++) {
+            res.set(i % w, (int) (i / w), data[i]);
+        }
+        return res;
+    }
+
 }

@@ -3,7 +3,7 @@ package de.rwth.i5.kinectvision.mqtt;
 
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
 import de.rwth.i5.kinectvision.machinevision.FrameSource;
-import de.rwth.i5.kinectvision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;

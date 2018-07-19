@@ -1,4 +1,4 @@
-package de.rwth.i5.kinectvision.model;
+package de.rwth.i5.kinectvision.machinevision.model;
 
 import lombok.Getter;
 import lombok.Setter;

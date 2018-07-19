@@ -66,7 +66,7 @@
         <dependency>
             <groupId>org.boofcv</groupId>
             <artifactId>visualize</artifactId>
-            <version>0.18</version>
+            <version>0.26</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.boofcv/openkinect -->
         <dependency>
