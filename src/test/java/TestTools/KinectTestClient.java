@@ -4,6 +4,7 @@ package TestTools;
 import de.rwth.i5.kinectvision.machinevision.FiducialDetectionResult;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
+import de.rwth.i5.kinectvision.machinevision.MachineVision;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import georegression.struct.point.Point2D_F64;
@@ -28,10 +29,27 @@ public class KinectTestClient {
     public KinectTestClient(VideoPanel viewer, KinectClient client) {
         this.viewer = viewer;
         this.viewer.setClient(this);
+        client.setFrameHandler(new MachineVision(client));
+
         client.setFrameHandler(new FrameHandler() {
             @Override
             public void onDepthFrame(DepthModel o) {
                 depth = o;
+                System.out.println("This should be about 1300mm: " + o.getDepthFrame()[91 * 512 + 243] + "mm");
+                /*
+                BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
+                int rgb = 0;
+                for (int j = 0; j < 424 * 512; j++) {
+//                    System.out.println(o.getXYZ()[j]);
+                    rgb = 0;
+                    rgb = Color.HSBtoRGB(o.getDepthFrame()[j] / 1000f, 1, 1);
+                    buf.setRGB(j % 512, (int) (j / 512), rgb);
+                }
+                if (viewer.videoTexture == null) {
+                    return;
+                }
+//                viewer.videoTexture.update(buf);
+*/
             }
 
             @Override
@@ -85,6 +103,7 @@ public class KinectTestClient {
 
             }
         });
+
         try {
             client.initialize();
         } catch (MqttException e) {
