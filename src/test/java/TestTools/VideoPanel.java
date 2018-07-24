@@ -1,10 +1,8 @@
 package TestTools;
 
 import edu.ufl.digitalworlds.j4k.VideoFrame;
-import edu.ufl.digitalworlds.opengl.OpenGLPanel;
 import lombok.Setter;
 
-import javax.media.opengl.GL2;
 import java.awt.event.MouseEvent;
 
 /*
@@ -42,13 +40,13 @@ import java.awt.event.MouseEvent;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 @SuppressWarnings("serial")
-public class VideoPanel extends OpenGLPanel {
+public class VideoPanel {//extends OpenGLPanel {
     @Setter
     KinectTestClient client;
     VideoFrame videoTexture;
 
     public void setup() {
-
+/*
         //OPENGL SPECIFIC INITIALIZATION (OPTIONAL)
         GL2 gl = getGL2();
         gl.glEnable(GL2.GL_CULL_FACE);
@@ -73,16 +71,17 @@ public class VideoPanel extends OpenGLPanel {
         videoTexture = new VideoFrame();
 
         background(0, 0, 0);
+        */
     }
 
-    @Override
+    //@Override
     public void mouseClicked(int x, int y, MouseEvent e) {
-        super.mouseClicked(x, y, e);
+//        super.mouseClicked(x, y, e);
         this.client.saveDataClicked();
     }
 
     public void draw() {
-
+/*
         GL2 gl = getGL2();
 
 
@@ -98,6 +97,7 @@ public class VideoPanel extends OpenGLPanel {
         image(8.0 / 3.0, 2);
 
         popMatrix();
+        */
     }
 
 

@@ -11,4 +11,5 @@ public class MachineVisionTest {
         int x = 0, y = 0, depth = 0;
         Point3D_F32 res = MachineVision.fromKinectToXYZ(x, y, depth);
     }
+
 }

@@ -4,7 +4,6 @@ import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import edu.ufl.digitalworlds.gui.DWApp;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * This is a tool for capturing depth and infrared data to store them in a file. To save simply click on the video
@@ -43,7 +42,7 @@ public class Screenshotter extends DWApp {
         myKinect = new KinectTestClient(main_panel, kinectClient);
         setLoadingProgress("Intitializing OpenGL...", 60);
 
-        p_root.add(main_panel, BorderLayout.CENTER);
+//        p_root.add(main_panel, BorderLayout.CENTER);
     }
 
     public void GUIclosing() {

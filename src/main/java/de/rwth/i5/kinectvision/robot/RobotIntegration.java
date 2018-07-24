@@ -1,4 +1,4 @@
-package de.rwth.i5.kinectvision.machinevision;
+package de.rwth.i5.kinectvision.robot;
 
 import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingPolytope;

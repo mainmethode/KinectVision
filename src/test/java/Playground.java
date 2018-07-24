@@ -16,7 +16,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 
-public class MachineVisionTest {
+/**
+ * This class is for playing around with different tools
+ */
+public class Playground {
 
     public void testFiducialFinderFromFile() {
         File file = new File(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("infrared_1.png"), "The provided file is null.").getFile());
@@ -59,7 +62,11 @@ public class MachineVisionTest {
         }
     }
 
-    @Test
+    /**
+     * This method generates a heatmap as a visualization for a depth frame
+     */
+//    @Test
+
     public void createDepthMapConversionVisualization() {
         DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
         BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
@@ -94,6 +101,24 @@ public class MachineVisionTest {
 //        while (true) {
 //        }
 
+    }
+
+    @Test
+    public void showDepthMapHeatmap() {
+        DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
+        BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
+        int rgb = 0;
+        int x, y, z;
+        Point3D_F32 conversion;
+
+        for (int j = 0; j < 424 * 512; j++) {
+            rgb = Color.HSBtoRGB(depthModel.getDepthFrame()[j] / 1000f, 1, 1);
+            buf.setRGB(j % 512, j / 512, rgb);
+        }
+//Display visualization
+        ShowImages.showWindow(buf, "");
+        while (true) {
+        }
     }
 
 

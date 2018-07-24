@@ -17,9 +17,16 @@ public class RobotModel {
     private BoundingBox arm;
 
     /**
-     *
+     * This is the rotation point of the arm
      */
-    private Point3D start;
+    private Point3D rotStart;
+
+    /**
+     * This is where the rotation vector points to
+     */
+
+    private Point3D rotDir;
+
 
     public void x() {
 

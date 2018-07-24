@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
 import javax.swing.*;
-import java.awt.*;
 
 @Configuration
 @ImportResource("classpath:spring.xml")
@@ -45,7 +44,7 @@ public class MqttKinectTest extends DWApp {
         myKinect = new KinectTestClient(main_panel, kinectClient);
         setLoadingProgress("Intitializing OpenGL...", 60);
 
-        p_root.add(main_panel, BorderLayout.CENTER);
+//        p_root.add(main_panel, BorderLayout.CENTER);
     }
 
     public void GUIclosing() {
