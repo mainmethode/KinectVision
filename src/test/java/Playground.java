@@ -4,16 +4,22 @@ import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.MachineVision;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.machinevision.model.Triangle;
+import de.rwth.i5.kinectvision.robot.Robot;
+import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point3d;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -66,7 +72,6 @@ public class Playground {
      * This method generates a heatmap as a visualization for a depth frame
      */
 //    @Test
-
     public void createDepthMapConversionVisualization() {
         DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
         BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
@@ -79,16 +84,7 @@ public class Playground {
 
             for (int j = 0; j < 424 * 512; j++) {
                 conversion = MachineVision.fromKinectToXYZ(j % 512, j / 512, depthModel.getDepthFrame()[j]);
-//                System.out.println(conversion.x + "\t" + conversion.y + "\t" + conversion.z);
                 fileWriter.write(((int) conversion.x) + " " + ((int) conversion.y) + " " + ((int) conversion.z + "\n"));
-                //            rgb = Color.HSBtoRGB(depthModel.getDepthFrame()[j] / 1000f, 1, 1);
-//            if (((int) conversion.y) > -100 && conversion.x > 0 && conversion.x < 500 && conversion.z > 0) {
-//try {
-//    buf.setRGB(((int) conversion.x), ((int) conversion.z /10), Color.RED.getRGB());
-//}catch (Exception e){
-//    System.out.println(conversion);
-//}
-//            }
 
 
             }
@@ -103,7 +99,7 @@ public class Playground {
 
     }
 
-    @Test
+    //    @Test
     public void showDepthMapHeatmap() {
         DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
         BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
@@ -115,74 +111,68 @@ public class Playground {
             rgb = Color.HSBtoRGB(depthModel.getDepthFrame()[j] / 1000f, 1, 1);
             buf.setRGB(j % 512, j / 512, rgb);
         }
-//Display visualization
+        //Display visualization
         ShowImages.showWindow(buf, "");
         while (true) {
         }
     }
 
 
-    //    @Test
     public void convertBinToBuf() {
         short[] data = KinectDataStore.readInfraredData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\infrared_1.bin");
-//        BufferedImage buf = new BufferedImage(512, 424, BufferedImage.TYPE_USHORT_GRAY);
 
         BufferedImage buf = VisualizeImageData.colorizeSign(FiducialFinder.toGrayF32Image(data, 512, 424), null, -1);
         ShowImages.showWindow(buf, "");
         while (true) {
         }
+
+    }
+
+    /**
+     * This is a testing method for placing the robot in the point cloud. For this the point cloud and also the robot 3d model
+     * are being exported as a xyz file. The marker positions are also included.
+     */
+    @Test
+    public void testRobotInPointCloud() {
         /*
-        int idx = 0;
-        int iv = 0;
-        short sv = 0;
-        byte bv = 0;
-        int abgr;
-
-
-
-        for (int i = 0; i < 512 * 424; i++) {
-            sv = data[i];
-//            int unsigned = sv >= 0 ? sv : ((sv & 0x7FFF) + 32768);
-            iv = sv >= 0 ? sv : 0x10000 + sv;
-            bv = (byte) ((iv & 0xfff8) >> 6);
-//            abgr = bv + (bv << 8) + (bv << 16);
-//            buf.setRGB(i % 512, (int) (i / 512), unsigned);
-            buf.setRGB(i % 512, (int) (i / 512), iv);
-//            System.out.println(unsigned);
-//            System.out.println(bv);
+        Generate test point cloud (a floor)
+         */
+        int x = -100;
+        int y = -100;
+        int z = 100;
+        DepthMap environmentMap = new DepthMap(512, 424);
+        ArrayList<Point3d> points = new ArrayList<>();
+        for (int i = x; i < 100 + x; i++) {
+            for (int j = y; j < 100 + y; j++) {
+                points.add(new Point3d(i, j, z));
+            }
         }
 
-        */
-/*
-        byte bgra[] = new byte[512 * 424 * 4];
-        int idx = 0;
-        int iv = 0;
-        short sv = 0;
-        byte bv = 0;
-        for (int i = 0; i < 512 * 424; i++) {
-            sv = data[i];
-//            iv = sv >= 0 ? sv : 0x10000 + sv;
-//            bv = (byte) ((iv & 0xfff8) >> 6);
-            bgra[idx] = (byte) (sv & 0x00FF);
-//            bgra[idx] = bv;
-            idx++;
-            bgra[idx] = (byte) (sv & 0xFF00);
-            idx++;
-            bgra[idx] = 0;
-            idx++;
-            bgra[idx] = 0;
-            idx++;
+        /*
+        Create a robot
+         */
+        Robot robot = new Robot();
+        //Set the position of the first marker to the middle of the floor
+        robot.loadRobotModel();
+        robot.setRealWorldBasePosition1(new Point3d(-50, -50, 100));
 
-        }
-
-//        buf = FiducialFinder.toBufIm(bgra, 512, 424);
-        File outputfile = new File("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\neu.png");
+        /*
+        Create visualization
+         */
         try {
-            ImageIO.write(buf, "png", outputfile);
+            FileWriter w = new FileWriter(new File("C:\\Users\\Justin\\Desktop\\testfile.txt"));
+            PolygonMesh roboModel = robot.getCurrentRealWorldModel();
+            for (Point3d point3d : points) {
+                w.write(point3d.x + " " + point3d.y + " " + point3d.z + "\n");
+            }
+            for (Triangle triangle : roboModel) {
+                w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + "\n");
+                w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + "\n");
+                w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + "\n");
+            }
+            w.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    */
     }
 }
