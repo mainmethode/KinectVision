@@ -1,7 +1,11 @@
 package de.rwth.i5.kinectvision.machinevision.model;
 
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Point3D;
+//import javafx.geometry.BoundingBox;
+//import javafx.geometry.Point3D;
+
+//import javafx.geometry.Point3D;
+//
+//import javax.media.j3d.BoundingBox;
 
 /**
  * This class is a representation of the robot's current position in the three-dimensional space of the Kinect.
@@ -14,18 +18,18 @@ public class RobotModel {
     /**
      * The bounding boxes represent the bounds of the arms.
      **/
-    private BoundingBox arm;
+//    private BoundingBox arm;
 
     /**
      * This is the rotation point of the arm
      */
-    private Point3D rotStart;
+//    private Point3D rotStart;
 
     /**
      * This is where the rotation vector points to
      */
 
-    private Point3D rotDir;
+//    private Point3D rotDir;
 
 
     public void x() {

@@ -1,10 +1,11 @@
 package TestTools;
 
 
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 import de.rwth.i5.kinectvision.machinevision.FiducialDetectionResult;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
-import de.rwth.i5.kinectvision.machinevision.MachineVision;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import georegression.struct.point.Point2D_F64;
@@ -12,7 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.util.ArrayList;
 
 /**
@@ -20,41 +24,51 @@ import java.util.ArrayList;
  */
 @Slf4j
 public class KinectTestClient {
-    private VideoPanel viewer;
-
     private KinectClient client;
     private short[] infra = new short[0];
     private DepthModel depth;
+    ImagePanel p;
+    BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
+    private int pty = 20;
+    private int ptx = 20;
 
-    public KinectTestClient(VideoPanel viewer, KinectClient client) {
-        this.viewer = viewer;
-        this.viewer.setClient(this);
-        client.setFrameHandler(new MachineVision(client));
+    public KinectTestClient(KinectClient client) {
+        //Generates a window for showing the output
+        p = ShowImages.showWindow(buf, "");
+        p.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                saveDataClicked();
+            }
+        });
 
         client.setFrameHandler(new FrameHandler() {
             @Override
             public void onDepthFrame(DepthModel o) {
+                //DepthFrame: Visualize
                 depth = o;
-                System.out.println("This should be about 1300mm: " + o.getDepthFrame()[91 * 512 + 243] + "mm");
-                /*
                 BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
+                Graphics2D g = buf.createGraphics();
+                g.setStroke(new BasicStroke(10));
+                g.setColor(Color.RED);
                 int rgb = 0;
                 for (int j = 0; j < 424 * 512; j++) {
-//                    System.out.println(o.getXYZ()[j]);
+                    System.out.println(o.getXYZ()[j]);
                     rgb = 0;
                     rgb = Color.HSBtoRGB(o.getDepthFrame()[j] / 1000f, 1, 1);
-                    buf.setRGB(j % 512, (int) (j / 512), rgb);
+                    buf.setRGB((j % 512), (int) (j / 512), rgb);
                 }
-                if (viewer.videoTexture == null) {
-                    return;
-                }
-//                viewer.videoTexture.update(buf);
-*/
+                /*
+                 * Set if the vis should be shown.
+                 */
+                //p.setBufferedImage(buf);
+
             }
 
             @Override
             public void OnInfraredFrame(short[] data) {
-//                data = KinectDataStore.readInfraredData("infrared_1.bin");
+                //Infrared frame: Visualize and find markers
                 infra = data;
                 //GrayF32 img = FiducialFinder.toGrayF32Image(data, 512, 424);
                 // For visualisation
@@ -91,16 +105,15 @@ public class KinectTestClient {
                         g.drawLine(((int) bound1.x), (int) bound1.y, (int) bound2.x, (int) bound2.y);
                     }
                 }
-
-                if (viewer.videoTexture != null)
-                    viewer.videoTexture.update(buf);
-
-
+                /*
+                Set if vis should be shown
+                 */
+                p.setBufferedImage(buf);
             }
 
             @Override
             public void onColorFrame(byte[] payload) {
-
+                //Unused
             }
         });
 
@@ -123,8 +136,15 @@ public class KinectTestClient {
         }
     }
 
-    public void setClient(KinectClient client) {
-        this.client = client;
+    public void showXYZ(int x, int y) {
+//        x = 511-x;
+//        y = 423-y;
+        ptx = x;
+        pty = y;
+
+        if (depth != null) {
+            System.out.println(depth.getDepthFrame()[y * 512 + x]);
+        }
     }
 }
 

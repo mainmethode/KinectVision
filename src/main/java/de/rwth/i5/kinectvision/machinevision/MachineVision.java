@@ -22,11 +22,16 @@ public class MachineVision implements FrameHandler {
     }
 
     public static Point3D_F32 fromKinectToXYZ(int i, int j, int depth) {
-
+//        float x = ((float) (((i / 512) - 0.5) * depth * 2 * Math.tan(Math.toRadians(70) / 2)));
+//        float y = 0;
+//        float z = depth;
+///*
         float x = (i - 512 / 2) * (depth + minDistance) * scaleFactor;
         float y = (j - 424 / 2) * (depth + minDistance) * scaleFactor;
         int z = depth;
+
         return new Point3D_F32(x, y, z);
+
     }
 
     /**
@@ -43,6 +48,9 @@ public class MachineVision implements FrameHandler {
     }
 
     @Override
+    /**
+     * An infrared frame will be used to determine the camera resp. the robot position
+     */
     public void OnInfraredFrame(short[] data) {
         GrayF32 img = FiducialFinder.toGrayF32Image(data, 512, 424);
         // For visualisation

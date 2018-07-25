@@ -36,7 +36,7 @@ public class FiducialFinder {
                 new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 21), GrayF32.class);
         detector.detect(original);
 
-        log.info(detector.totalFound() + " fiducials found.");
+//        log.info(detector.totalFound() + " fiducials found.");
         //Iterate over all fiducials found
         Point2D_F64 locationPixel = new Point2D_F64();
         Polygon2D_F64 bounds = new Polygon2D_F64();
@@ -49,7 +49,7 @@ public class FiducialFinder {
 //                System.out.println("Target ID = " + detector.getId(i));
 //            if (detector.hasMessage())
 //                System.out.println("Message   = " + detector.getMessage(i));
-            log.debug("2D Image Location = " + locationPixel);
+//            log.debug("2D Image Location = " + locationPixel);
         }
 
         return detectionList;
