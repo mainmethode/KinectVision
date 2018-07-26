@@ -54,13 +54,14 @@ public class Screenshotter {
             public void onDepthFrame(DepthModel o) {
                 //DepthFrame: Visualize
                 depth = o;
+
                 BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
                 Graphics2D g = buf.createGraphics();
                 g.setStroke(new BasicStroke(10));
                 g.setColor(Color.RED);
                 int rgb = 0;
                 for (int j = 0; j < 424 * 512; j++) {
-                    System.out.println(o.getXYZ()[j]);
+//                    System.out.println(o.getXYZ()[j]);
                     rgb = 0;
                     rgb = Color.HSBtoRGB(o.getDepthFrame()[j] / 1000f, 1, 1);
                     buf.setRGB((j % 512), (int) (j / 512), rgb);

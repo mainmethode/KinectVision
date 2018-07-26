@@ -47,7 +47,7 @@ public class Cube extends PolygonMesh {
         ArrayList<Vector3d> vecs = new ArrayList<>();
         for (int i = 0; i < verts.length; i += 3) {
             Vector3d v = new Vector3d(verts[i], verts[i + 1], verts[i + 2]);
-            v.scale(10);
+            v.scale(0.5);
             vecs.add(v);
 
         }

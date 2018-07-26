@@ -72,20 +72,19 @@ public class Playground {
      */
 //    @Test
     public void createDepthMapConversionVisualization() {
-        DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
+        DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\ibims.bin");
+        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
         BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
         int rgb = 0;
         int x, y, z;
-        Point3D_F32 conversion;
         try {
-            FileWriter fileWriter = new FileWriter(new File("C:\\Users\\Justin\\Desktop\\yolo.txt"));
+            FileWriter fileWriter = new FileWriter(new File("C:\\Users\\Justin\\Desktop\\yolo3000.txt"));
 
 
-            for (int j = 0; j < 424 * 512; j++) {
-//                conversion = MachineVision.fromKinectToXYZ(j % 512, j / 512, depthModel.getDepthFrame()[j]);
-//                fileWriter.write(((int) conversion.x) + " " + ((int) conversion.y) + " " + ((int) conversion.z + "\n"));
-
-
+            for (int i = 0; i < 424; i++) {
+                for (int j = 0; j < 512; j++) {
+                    fileWriter.write(map.realX[424 * i + j] + " " + map.realY[424 * i + j] + " " + map.realZ[424 * i + j] + "\n");
+                }
             }
             fileWriter.close();
         } catch (IOException e) {
@@ -134,16 +133,18 @@ public class Playground {
     @Test
     public void testRobotInPointCloud() {
         /*
-        Generate test point cloud (a floor)
+        Load point cloud
          */
-        int x = -100;
-        int y = -100;
-        int z = 100;
-        DepthMap environmentMap = new DepthMap(512, 424);
+
+
+        DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\ibims.bin");
+        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
+
+
         ArrayList<Point3d> points = new ArrayList<>();
-        for (int i = x; i < 100 + x; i++) {
-            for (int j = y; j < 100 + y; j++) {
-                points.add(new Point3d(i, j, z));
+        for (int i = 0; i < 424; i++) {
+            for (int j = 0; j < 512; j++) {
+                points.add(new Point3d(map.realX[424 * i + j], map.realY[424 * i + j], map.realZ[424 * i + j]));
             }
         }
 
@@ -151,9 +152,9 @@ public class Playground {
         Create a robot
          */
         Robot robot = new Robot();
-        //Set the position of the first marker to the middle of the floor
         robot.loadRobotModel();
-        robot.setRealWorldBasePosition1(new Point3d(-50, -50, 100));
+        //Place the model inside the model
+        robot.setRealWorldBasePosition1(new Point3d(-0.5, -0.15, 1.8));
 
         /*
         Create visualization
@@ -162,12 +163,12 @@ public class Playground {
             FileWriter w = new FileWriter(new File("C:\\Users\\Justin\\Desktop\\testfile.txt"));
             PolygonMesh roboModel = robot.getCurrentRealWorldModel();
             for (Point3d point3d : points) {
-                w.write(point3d.x + " " + point3d.y + " " + point3d.z + "\n");
+                w.write(point3d.x + " " + point3d.y + " " + point3d.z + " 10 10 10\n");
             }
             for (Triangle triangle : roboModel) {
-                w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + "\n");
-                w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + "\n");
-                w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + "\n");
+                w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + " 255 0 0\n");
+                w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + " 255 0 0\n");
+                w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + " 255 0 0\n");
             }
             w.close();
         } catch (IOException e) {

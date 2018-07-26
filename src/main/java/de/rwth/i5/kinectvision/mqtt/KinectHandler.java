@@ -39,7 +39,7 @@ public class KinectHandler implements FrameHandler {
     public void OnInfraredFrame(short[] data) {
         // Get the marker positions
         ArrayList<Marker3d> markers = CameraCalibration.generate3dMarkers(data, lastDepth);
-        
+
 
         /*
         Only for visualization purposes.

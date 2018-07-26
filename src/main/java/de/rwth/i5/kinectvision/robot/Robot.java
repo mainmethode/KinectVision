@@ -4,7 +4,6 @@ import de.rwth.i5.kinectvision.machinevision.model.Cube;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.RobotModel;
 
-import javax.media.j3d.BoundingBox;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -29,7 +28,6 @@ public class Robot {
      */
     public void loadRobotModel() {
         //Creates a standard cube
-        BoundingBox boundingBox = new BoundingBox();
         robotModel = new RobotModel();
         robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
         robotModel.setArm(new Cube());
