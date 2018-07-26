@@ -1,11 +1,13 @@
 package de.rwth.i5.kinectvision.robot;
 
 import de.rwth.i5.kinectvision.machinevision.model.Cube;
+import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.RobotModel;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+import java.util.List;
 
 /**
  * This class loads the robot 3D model, handles all incoming robot events and moves the model accordingly.
@@ -18,10 +20,11 @@ public class Robot {
      * This method is called when the robot changed its position
      * TODO: This is just a dummy method. We do not know how the robot behaves yet.
      */
-    public void onPositionChange() {
+    public void changePosition(int dummyVal) {
 
     }
 
+    //TODO load model and add parameter for model (file) in method
 
     /**
      * Loads the model of the robot
@@ -29,7 +32,8 @@ public class Robot {
     public void loadRobotModel() {
         //Creates a standard cube
         robotModel = new RobotModel();
-        robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
+//        robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
+        robotModel.setBasePoint1(new Vector3d(-0.5f, -0.5f, 0.5f));
         robotModel.setArm(new Cube());
     }
 
@@ -47,14 +51,6 @@ public class Robot {
     }
 
     //TODO: Set other base positions (one is not enough of course)
-
-    public RobotModel getRobotModel() {
-        return robotModel;
-    }
-
-    public void setRobotModel(RobotModel robotModel) {
-        this.robotModel = robotModel;
-    }
 
     /**
      * This method generates a real world 3d representation of the robot.
@@ -79,5 +75,14 @@ public class Robot {
         res.translate(translationVector);
 
         return res;
+    }
+
+    /**
+     * Set the positions
+     *
+     * @param marker3dList
+     */
+    public void setRealWorldBasePositions(List<Marker3d> marker3dList) throws Exception {
+        throw new Exception("Marker with ID X could not be found in the robot model.");
     }
 }

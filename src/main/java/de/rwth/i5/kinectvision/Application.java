@@ -3,7 +3,7 @@ package de.rwth.i5.kinectvision;
 
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
-import lombok.Setter;
+import de.rwth.i5.kinectvision.robot.RobotClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,22 +21,28 @@ import org.springframework.context.annotation.ImportResource;
 public class Application implements CommandLineRunner {
     public static final String MqttUrl = "";
 
-    @Setter
-    private KinectClient client;
-
     public static void main(String[] args) {
         //Start the Application
         ConfigurableApplicationContext context =
                 SpringApplication.run(Application.class);
-        //Initialize the KinectClient which listens to the Mqtt messages
+        /*
+        Initialize the KinectClient which listens to the Mqtt messages
+         */
         KinectClient kinectClient = context.getBean(KinectClient.class);
         //Set the frame handler
-        kinectClient.setFrameHandler(new KinectHandler());
+        KinectHandler handler = new KinectHandler();
+        kinectClient.setFrameHandler(handler);
         try {
             kinectClient.initialize();
         } catch (MqttException e) {
             e.printStackTrace();
         }
+
+        /*
+        Initialize the RobotClient
+         */
+        RobotClient robotClient = new RobotClient();
+        handler.setRobot(robotClient.getRobot());
 
     }
 

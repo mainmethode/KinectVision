@@ -165,11 +165,14 @@ public class Playground {
             for (Point3d point3d : points) {
                 w.write(point3d.x + " " + point3d.y + " " + point3d.z + " 10 10 10\n");
             }
+
             for (Triangle triangle : roboModel) {
                 w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + " 255 0 0\n");
                 w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + " 255 0 0\n");
                 w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + " 255 0 0\n");
             }
+
+
             w.close();
         } catch (IOException e) {
             e.printStackTrace();
