@@ -2,7 +2,6 @@ import TestTools.KinectDataStore;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
-import de.rwth.i5.kinectvision.machinevision.MachineVision;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
@@ -83,8 +82,8 @@ public class Playground {
 
 
             for (int j = 0; j < 424 * 512; j++) {
-                conversion = MachineVision.fromKinectToXYZ(j % 512, j / 512, depthModel.getDepthFrame()[j]);
-                fileWriter.write(((int) conversion.x) + " " + ((int) conversion.y) + " " + ((int) conversion.z + "\n"));
+//                conversion = MachineVision.fromKinectToXYZ(j % 512, j / 512, depthModel.getDepthFrame()[j]);
+//                fileWriter.write(((int) conversion.x) + " " + ((int) conversion.y) + " " + ((int) conversion.z + "\n"));
 
 
             }
