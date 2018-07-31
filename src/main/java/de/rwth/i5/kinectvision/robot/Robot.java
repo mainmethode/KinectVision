@@ -29,7 +29,7 @@ public class Robot {
     /**
      * Loads the model of the robot
      */
-    public void loadRobotModel() {
+    public void generateSampleRobotModel() {
         //Creates a standard cube
         robotModel = new RobotModel();
 //        robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
@@ -74,6 +74,19 @@ public class Robot {
         translationVector.add(new Vector3d(-robotModel.getBasePoint1().x, -robotModel.getBasePoint1().y, -robotModel.getBasePoint1().z));
         res.translate(translationVector);
 
+
+
+        /*
+
+Roboter an Markern ausrichten:
+-Zuerst den ersten Punkt ausrichten (Translation)
+-Dann Objekt skalieren:
+ -Dafür zuerst den Abstand d zwischen Marker 1 und Marker 2 messen
+ -Dann Abstand d' zwischen Marker 1 und Marker 2 auf dem Robotermodell messen (also die Abstände der Dummys)
+ -Objekt so skalieren, dass d = d'
+-Dann Objekt drehen, sodass Dummy Marker 2 auf Marker 2 ist
+-Dann Objekt drehen, sodass Dummy Marker 3 auf Marker 3 ist
+         */
         return res;
     }
 

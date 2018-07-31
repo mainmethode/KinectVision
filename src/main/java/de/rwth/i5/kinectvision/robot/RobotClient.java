@@ -15,7 +15,7 @@ public class RobotClient {
     public void initialize() {
         //TODO Robot file String
         robot = new Robot();
-        robot.loadRobotModel();
+        robot.generateSampleRobotModel();
 
         //Establish connection
     }

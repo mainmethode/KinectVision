@@ -152,7 +152,7 @@ public class Playground {
         Create a robot
          */
         Robot robot = new Robot();
-        robot.loadRobotModel();
+        robot.generateSampleRobotModel();
         //Place the model inside the model
         robot.setRealWorldBasePosition1(new Point3d(-0.5, -0.15, 1.8));
 
