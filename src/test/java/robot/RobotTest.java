@@ -33,7 +33,7 @@ public class RobotTest {
         //TODO Marker positions
         Marker3d marker1 = new Marker3d(1d, 1d, 0d, 1);
         markers.add(marker1);
-        Marker3d marker2 = new Marker3d();
+        Marker3d marker2 = new Marker3d(3d, 3d, 0d, 2);
         markers.add(marker2);
         Marker3d marker3 = new Marker3d();
         markers.add(marker3);

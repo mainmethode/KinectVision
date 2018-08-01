@@ -4,17 +4,19 @@ import de.rwth.i5.kinectvision.machinevision.model.Cube;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.RobotModel;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.vecmath.Point3d;
+import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
 /**
  * This class loads the robot 3D model, handles all incoming robot events and moves the model accordingly.
  */
+@Slf4j
 public class Robot {
     private RobotModel robotModel;
-    private Point3d basePosition1;
+    private Marker3d basePosition1;
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
@@ -38,7 +40,7 @@ public class Robot {
         robotModel.setArm(new Cube());
     }
 
-    public Point3d getBasePosition1() {
+    public Marker3d getBasePosition1() {
         return basePosition1;
     }
 
@@ -47,7 +49,7 @@ public class Robot {
      *
      * @param basePosition The center position of the first marker in real world coordinates.
      */
-    public void setRealWorldBasePosition1(Point3d basePosition) {
+    public void setRealWorldBasePosition1(Marker3d basePosition) {
         this.basePosition1 = basePosition;
     }
 
@@ -70,12 +72,74 @@ public class Robot {
         /*
         Transformation
          */
-        //At first translate the model such that the first base point is set on the real world position
-        //TODO: Hier war die letzte Bearbeitung. Als nächstes die Kommentare unten implementieren.
-        Vector3d translationVector = new Vector3d(basePosition1.x, basePosition1.y, basePosition1.z);
-        translationVector.add(new Vector3d(-robotModel.getBasePoint1().x, -robotModel.getBasePoint1().y, -robotModel.getBasePoint1().z));
-        res.translate(translationVector);
+        //Get the base points
+        if (bases.size() < 3) {
+            log.error("Not enough (" + bases.size() + ") marker positions set for the robot. At least 3 needed!");
+            return null;
+        }
+        Marker3d base1, base2, base3;
+        base1 = bases.iterator().next();
+        base2 = bases.iterator().next();
+        base3 = bases.iterator().next();
+        /*
+        Create transformation matrix
+         */
+        Matrix4d transformationMatrix = new Matrix4d();
+        //Translation to move base point 1 in the robot model to M1
+        Matrix4d translationMatrix = new Matrix4d();
+        translationMatrix.setIdentity();
+        translationMatrix.m03 = base1.getX() - robotModel.getBasePoint1().x;
+        translationMatrix.m13 = base1.getY() - robotModel.getBasePoint1().y;
+        translationMatrix.m23 = base1.getZ() - robotModel.getBasePoint1().z;
+        //Rotation to fit to M2, rot about Z
+        Matrix4d rotationMatrix = new Matrix4d();
+        //TODO: WHICH ANGLE??
+        double radianAngle = Math.toRadians(-45);
+        rotationMatrix.setIdentity();
+        rotationMatrix.m00 = Math.cos(radianAngle);
+        rotationMatrix.m01 = -Math.sin(radianAngle);
+        rotationMatrix.m02 = base1.getX() * (Math.cos(radianAngle) - 1) - base1.getY() * (Math.sin(radianAngle));
 
+        rotationMatrix.m10 = Math.sin(radianAngle);
+        rotationMatrix.m21 = Math.cos(radianAngle);
+        rotationMatrix.m32 = base1.getY() * (Math.cos(radianAngle) - 1) - base1.getX() * (Math.sin(radianAngle));
+
+        //Rotation to fit to M2, Rotate about the normal vector of the spanned triangle
+        double radianAngle2 = Math.toRadians(-45);
+        //The normal vector, we will rotate around it
+        Vector3d crossProduct = new Vector3d();
+        crossProduct.cross(new Vector3d(base2.getX() - base1.getX(), base2.getY() - base1.getY(), base2.getZ() - base1.getZ()),
+                new Vector3d(base2.getX() - base1.getX(), base2.getY() - base1.getY(), 0));
+
+        Matrix4d rotationMatrix2 = new Matrix4d();
+        double cosA = Math.cos(radianAngle2);
+        double sinA = Math.sin(radianAngle2);
+        double a, b, c;
+        a = crossProduct.x;
+        b = crossProduct.y;
+        c = crossProduct.z;
+        double K = 1 - cosA;
+        //The rotation Matrix
+        rotationMatrix2.m00 = a * a * K + cosA;
+        rotationMatrix2.m01 = a * b * K - c * sinA;
+        rotationMatrix2.m02 = a * c * K + b * sinA;
+
+        rotationMatrix2.m10 = a * b * K + c * sinA;
+        rotationMatrix2.m11 = b * b * K + cosA;
+        rotationMatrix2.m12 = b * c * K - a * sinA;
+
+        rotationMatrix2.m20 = a * c * K - b * sinA;
+        rotationMatrix2.m21 = b * c * K + a * sinA;
+        rotationMatrix2.m22 = c * c * K + cosA;
+
+        rotationMatrix2.m33 = 1;
+
+
+        //Scale to fit to M2
+        Matrix4d scaleMatrix = new Matrix4d();
+        scaleMatrix.setIdentity();
+        scaleMatrix.mul(1.41421356);
+        scaleMatrix.m33 = 1;
 
 
         /*
@@ -101,4 +165,5 @@ Roboter an Markern ausrichten:
         this.bases = marker3dList;
 //        throw new Exception("Marker with ID X could not be found in the robot model.");
     }
+
 }
