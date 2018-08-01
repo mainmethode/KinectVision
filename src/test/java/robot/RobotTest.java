@@ -7,9 +7,11 @@ import de.rwth.i5.kinectvision.robot.Robot;
 import org.junit.Test;
 
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Class for testing the Robot class
@@ -20,7 +22,7 @@ public class RobotTest {
      * As a reference a cube representing the robot has been translated in a 3D program to determine the
      * matrices. First translate (1,1,0), then rotate -45 degrees around M1 and then scale ~1.4 to fit to M2.
      */
-    @Test
+//    @Test
     public void testRealWorldTransformation() throws Exception {
         //Initialize the robot
         Robot robot = new Robot();
@@ -92,5 +94,18 @@ public class RobotTest {
         }
         //Every triangle should have a match
         assertEquals(12, matches);
+    }
+
+    @Test
+    public void testRotationMatrix() {
+        Matrix4d rotationMatrix2;
+        Vector3d vec = new Vector3d(1, 2, 3);
+        vec.normalize();
+        //The rotation Matrix
+        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(360, vec);
+        //The resulting matrix should be (nearly) an identity matrix
+        Matrix4d ref = new Matrix4d();
+        ref.setIdentity();
+        assertTrue(ref.epsilonEquals(rotationMatrix2, .000000001));
     }
 }

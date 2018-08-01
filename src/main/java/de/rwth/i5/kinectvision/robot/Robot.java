@@ -56,6 +56,50 @@ public class Robot {
     //TODO: Set other base positions (one is not enough of course)
 
     /**
+     * Creates the rotation matrix for a rotation about an arbitrary axis
+     *
+     * @param degreeAngle    The angle in degrees
+     * @param axisNormalized Normalized axis vector
+     * @return The rotation matrix
+     */
+    public static Matrix4d rotationMatrixArbitraryAxis(double degreeAngle, Vector3d axisNormalized) {
+        Matrix4d rotationMatrix2 = new Matrix4d();
+        double radianAngle = Math.toRadians(degreeAngle);
+        double cosA = Math.cos(radianAngle);
+        double sinA = Math.sin(radianAngle);
+        double a, b, c;
+        a = axisNormalized.x;
+        b = axisNormalized.y;
+        c = axisNormalized.z;
+        double K = 1 - cosA;
+        //The rotation Matrix
+        rotationMatrix2.m00 = a * a * K + cosA;
+        rotationMatrix2.m01 = a * b * K - c * sinA;
+        rotationMatrix2.m02 = a * c * K + b * sinA;
+
+        rotationMatrix2.m10 = a * b * K + c * sinA;
+        rotationMatrix2.m11 = b * b * K + cosA;
+        rotationMatrix2.m12 = b * c * K - a * sinA;
+
+        rotationMatrix2.m20 = a * c * K - b * sinA;
+        rotationMatrix2.m21 = b * c * K + a * sinA;
+        rotationMatrix2.m22 = c * c * K + cosA;
+
+        rotationMatrix2.m33 = 1;
+        return rotationMatrix2;
+    }
+
+    /**
+     * Set the positions
+     *
+     * @param marker3dList
+     */
+    public void setRealWorldBasePositions(ArrayList<Marker3d> marker3dList) {
+        this.bases = marker3dList;
+//        throw new Exception("Marker with ID X could not be found in the robot model.");
+    }
+
+    /**
      * This method generates a real world 3d representation of the robot.
      * Here the loaded robot model, the current axis orientations and the base positions are respected.
      * Thus, the returned model is already transformed and aligned to match the Kinect's coordinate system.
@@ -111,28 +155,8 @@ public class Robot {
         crossProduct.cross(new Vector3d(base2.getX() - base1.getX(), base2.getY() - base1.getY(), base2.getZ() - base1.getZ()),
                 new Vector3d(base2.getX() - base1.getX(), base2.getY() - base1.getY(), 0));
 
-        Matrix4d rotationMatrix2 = new Matrix4d();
-        double cosA = Math.cos(radianAngle2);
-        double sinA = Math.sin(radianAngle2);
-        double a, b, c;
-        a = crossProduct.x;
-        b = crossProduct.y;
-        c = crossProduct.z;
-        double K = 1 - cosA;
-        //The rotation Matrix
-        rotationMatrix2.m00 = a * a * K + cosA;
-        rotationMatrix2.m01 = a * b * K - c * sinA;
-        rotationMatrix2.m02 = a * c * K + b * sinA;
 
-        rotationMatrix2.m10 = a * b * K + c * sinA;
-        rotationMatrix2.m11 = b * b * K + cosA;
-        rotationMatrix2.m12 = b * c * K - a * sinA;
-
-        rotationMatrix2.m20 = a * c * K - b * sinA;
-        rotationMatrix2.m21 = b * c * K + a * sinA;
-        rotationMatrix2.m22 = c * c * K + cosA;
-
-        rotationMatrix2.m33 = 1;
+        Matrix4d rotationMatrix2 = rotationMatrixArbitraryAxis(radianAngle2, crossProduct);
 
 
         //Scale to fit to M2
@@ -155,15 +179,4 @@ Roboter an Markern ausrichten:
          */
         return res;
     }
-
-    /**
-     * Set the positions
-     *
-     * @param marker3dList
-     */
-    public void setRealWorldBasePositions(ArrayList<Marker3d> marker3dList) {
-        this.bases = marker3dList;
-//        throw new Exception("Marker with ID X could not be found in the robot model.");
-    }
-
 }

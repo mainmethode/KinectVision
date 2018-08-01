@@ -3,7 +3,6 @@ package de.rwth.i5.kinectvision.machinevision;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import lombok.extern.slf4j.Slf4j;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 
@@ -35,7 +34,6 @@ public class CameraCalibration {
             Marker3d marker3d = new Marker3d(x, y, depthData.getXYZ()[y * 512 + x], fiducialDetectionResult.getId());
             res.add(marker3d);
         }
-        throw new NotImplementedException();
-//        return res;
+        return res;
     }
 }
