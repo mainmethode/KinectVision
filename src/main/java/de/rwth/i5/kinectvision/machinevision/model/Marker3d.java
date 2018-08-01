@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Marker3d {
-    int x, y, z;
+    double x, y, z;
     long id;
 
     public Marker3d() {

@@ -16,13 +16,22 @@ public class Triangle {
         c.add(translationVector);
     }
 
+    private static void transformVector(Matrix4d transformationMatrix, Vector3d vector3d) {
+        vector3d.x = transformationMatrix.m00 * vector3d.x + transformationMatrix.m01 * vector3d.y + transformationMatrix.m02 * vector3d.z + transformationMatrix.m03;
+        vector3d.y = transformationMatrix.m10 * vector3d.x + transformationMatrix.m11 * vector3d.y + transformationMatrix.m12 * vector3d.z + transformationMatrix.m13;
+        vector3d.z = transformationMatrix.m20 * vector3d.x + transformationMatrix.m21 * vector3d.y + transformationMatrix.m22 * vector3d.z + transformationMatrix.m23;
+    }
+
     /**
      * Applys a given transformation matrix to the vectors in the triangle
      *
      * @param transformationMatrix The transformation matrix to apply
      */
     public void applyTransformation(Matrix4d transformationMatrix) {
-        //TODO Implement
+        //Transform every vector
+        transformVector(transformationMatrix, a);
+        transformVector(transformationMatrix, b);
+        transformVector(transformationMatrix, c);
     }
 
     @Override

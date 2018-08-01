@@ -7,7 +7,7 @@ import de.rwth.i5.kinectvision.machinevision.model.RobotModel;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This class loads the robot 3D model, handles all incoming robot events and moves the model accordingly.
@@ -15,6 +15,7 @@ import java.util.List;
 public class Robot {
     private RobotModel robotModel;
     private Point3d basePosition1;
+    private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
      * This method is called when the robot changed its position
@@ -70,6 +71,7 @@ public class Robot {
         Transformation
          */
         //At first translate the model such that the first base point is set on the real world position
+        //TODO: Hier war die letzte Bearbeitung. Als nächstes die Kommentare unten implementieren.
         Vector3d translationVector = new Vector3d(basePosition1.x, basePosition1.y, basePosition1.z);
         translationVector.add(new Vector3d(-robotModel.getBasePoint1().x, -robotModel.getBasePoint1().y, -robotModel.getBasePoint1().z));
         res.translate(translationVector);
@@ -95,7 +97,8 @@ Roboter an Markern ausrichten:
      *
      * @param marker3dList
      */
-    public void setRealWorldBasePositions(List<Marker3d> marker3dList) throws Exception {
-        throw new Exception("Marker with ID X could not be found in the robot model.");
+    public void setRealWorldBasePositions(ArrayList<Marker3d> marker3dList) {
+        this.bases = marker3dList;
+//        throw new Exception("Marker with ID X could not be found in the robot model.");
     }
 }
