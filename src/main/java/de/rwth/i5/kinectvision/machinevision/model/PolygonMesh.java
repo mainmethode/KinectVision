@@ -14,7 +14,7 @@ public class PolygonMesh implements Iterable<Triangle> {
 
     public void combine(PolygonMesh polygonMesh) {
         for (Triangle mesh : polygonMesh) {
-            triangles.add(mesh);
+            triangles.add(mesh.copy());
         }
     }
 

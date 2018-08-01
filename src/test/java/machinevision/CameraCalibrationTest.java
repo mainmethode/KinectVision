@@ -31,8 +31,8 @@ public class CameraCalibrationTest {
         assertNotNull(resultList);
         assertEquals(1, resultList.size());
         Marker3d marker3d = resultList.get(0);
-        assertEquals(marker3d.getX(), 243);
-        assertEquals(marker3d.getY(), 91);
-        assertEquals(marker3d.getZ(), 1279);
+        assertEquals(marker3d.getPosition().x, 243);
+        assertEquals(marker3d.getPosition().y, 91);
+        assertEquals(marker3d.getPosition().z, 1279);
     }
 }

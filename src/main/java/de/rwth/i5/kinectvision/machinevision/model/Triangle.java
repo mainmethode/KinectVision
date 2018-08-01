@@ -16,10 +16,16 @@ public class Triangle {
         c.add(translationVector);
     }
 
-    private static void transformVector(Matrix4d transformationMatrix, Vector3d vector3d) {
-        vector3d.x = transformationMatrix.m00 * vector3d.x + transformationMatrix.m01 * vector3d.y + transformationMatrix.m02 * vector3d.z + transformationMatrix.m03;
-        vector3d.y = transformationMatrix.m10 * vector3d.x + transformationMatrix.m11 * vector3d.y + transformationMatrix.m12 * vector3d.z + transformationMatrix.m13;
-        vector3d.z = transformationMatrix.m20 * vector3d.x + transformationMatrix.m21 * vector3d.y + transformationMatrix.m22 * vector3d.z + transformationMatrix.m23;
+    public static void transformVector(Matrix4d transformationMatrix, Vector3d vector3d) {
+        double x, y, z;
+
+        x = transformationMatrix.m00 * vector3d.x + transformationMatrix.m01 * vector3d.y + transformationMatrix.m02 * vector3d.z + transformationMatrix.m03;
+        y = transformationMatrix.m10 * vector3d.x + transformationMatrix.m11 * vector3d.y + transformationMatrix.m12 * vector3d.z + transformationMatrix.m13;
+        z = transformationMatrix.m20 * vector3d.x + transformationMatrix.m21 * vector3d.y + transformationMatrix.m22 * vector3d.z + transformationMatrix.m23;
+
+        vector3d.x = x;
+        vector3d.y = y;
+        vector3d.z = z;
     }
 
     /**
@@ -53,9 +59,23 @@ public class Triangle {
                 Objects.equals(c, triangle.c);
     }
 
+    public boolean equalsEps(Triangle triangle, double eps) {
+        return (triangle.a.epsilonEquals(a, eps) && triangle.b.epsilonEquals(b, eps) && triangle.c.epsilonEquals(c, eps));
+    }
+
     @Override
     public int hashCode() {
 
         return Objects.hash(a, b, c);
+    }
+
+
+    public Triangle copy() {
+        Vector3d a, b, c;
+        a = new Vector3d(this.a.x, this.a.y, this.a.z);
+        b = new Vector3d(this.b.x, this.b.y, this.b.z);
+        c = new Vector3d(this.c.x, this.c.y, this.c.z);
+        Triangle res = new Triangle(a, b, c);
+        return res;
     }
 }

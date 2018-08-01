@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 /**
  * This class is a representation of the robot's current position in the three-dimensional space of the Kinect.
@@ -33,5 +34,14 @@ public class RobotModel {
     /**
      * This 3d point defines where the first base point is in the model (relative to the center of the model file).
      */
-    private Vector3d basePoint1;
+    private ArrayList<Marker3d> basePoints = new ArrayList<>();
+
+    /**
+     * Adds a new base point
+     *
+     * @param namedBasePoint Marker containing id and position
+     */
+    public void addBasePoint(Marker3d namedBasePoint) {
+        basePoints.add(namedBasePoint);
+    }
 }
