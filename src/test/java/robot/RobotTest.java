@@ -43,7 +43,7 @@ public class RobotTest {
         ArrayList<Marker3d> markers = new ArrayList<>();
         Marker3d marker1 = new Marker3d(1d, 1d, 0d, 1);
         markers.add(marker1);
-        Marker3d marker2 = new Marker3d(3d, 3d, 0d, 2);
+        Marker3d marker2 = new Marker3d(3d, 3d, 2.8d, 2);
         markers.add(marker2);
         //TODO: Last marker position
         Marker3d marker3 = new Marker3d();
@@ -78,8 +78,19 @@ public class RobotTest {
         rotationMatrix.m13 = 1 * (1 - Math.cos(radianAngle)) - 1 * (Math.sin(radianAngle));
 
         Vector3d referenceMarker1 = new Vector3d(-1, -1, -1);
+        //Scale to fit to M2
+        Matrix4d scaleMatrix = new Matrix4d();
+        double factor = 1.41421356;
+        scaleMatrix.setIdentity();
+        scaleMatrix.mul(factor);
+        scaleMatrix.m33 = 1;
+        scaleMatrix.m03 = 1 - 1.41421356;
+        scaleMatrix.m13 = 1 - 1.41421356;
+        scaleMatrix.m23 = (1 - 1.41421356) * 0;
 
-        transformationMatrix.mul(rotationMatrix, translationMatrix);
+        transformationMatrix.mul(scaleMatrix, rotationMatrix);
+        transformationMatrix.mul(translationMatrix);
+//        transformationMatrix.mul(rotationMatrix, translationMatrix);
 
 
         Triangle.transformVector(transformationMatrix, referenceMarker1);
@@ -90,20 +101,10 @@ public class RobotTest {
         assertEquals(1, referenceMarker1.x, 0.1);
         assertEquals(1, referenceMarker1.y, 0.1);
         assertEquals(0, referenceMarker1.z, 0.1);
-        //Scale to fit to M2
-        Matrix4d scaleMatrix = new Matrix4d();
-        double factor = 1.41421356;
-        scaleMatrix.setIdentity();
-        scaleMatrix.mul(factor);
-        scaleMatrix.m33 = 1;
-        scaleMatrix.m03 = 1 - 1.41421356;
-        scaleMatrix.m13 = 1 - 1.41421356;
-        scaleMatrix.m23 = 0;
 
         //Apply the reference transformation matrix to every triangle
         for (Triangle triangle : refObject) {
             triangle.applyTransformation(transformationMatrix);
-            System.out.println(triangle);
         }
 
         /*
@@ -117,7 +118,8 @@ public class RobotTest {
         //Look for a matching triangle in the reference
         for (Triangle triangle : testObj) {
             for (Triangle refTriangle : refObject) {
-                if (triangle.equalsEps(refTriangle, 0.1)) {
+                if (triangle.equalsEps(refTriangle, 0.0001)) {
+                    System.out.println();
                     System.out.println("match");
                     System.out.println(triangle);
                     System.out.println(refTriangle);
@@ -126,7 +128,7 @@ public class RobotTest {
                     break;
                 }
             }
-            System.out.println(triangle);
+//            System.out.println(triangle);
         }
 
         PolygonMesh out1 = robot.getCombinedModel();
@@ -149,5 +151,16 @@ public class RobotTest {
         Matrix4d ref = new Matrix4d();
         ref.setIdentity();
         assertTrue(ref.epsilonEquals(rotationMatrix2, .000000001));
+    }
+
+    //    @Test
+    public void testRotationMatrix45() {
+        Matrix4d rotationMatrix2;
+        Vector3d vec = new Vector3d(0, 0, 0);
+        vec.normalize();
+        //The rotation Matrix
+//        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(Math.toRadians()45, vec);
+//        Triangle.transformVector(rotationMatrix2,vec);
+        assertEquals(new Vector3d(), vec);
     }
 }
