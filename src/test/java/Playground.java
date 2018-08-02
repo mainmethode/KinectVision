@@ -7,7 +7,6 @@ import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
-import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.junit.Test;
 
@@ -21,6 +20,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+
+//import edu.ufl.digitalworlds.j4k.DepthMap;
 
 /**
  * This class is for playing around with different tools
@@ -74,7 +75,8 @@ public class Playground {
 //    @Test
     public void createDepthMapConversionVisualization() {
         DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\ibims.bin");
-        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
+//        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
+
         BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
         int rgb = 0;
         int x, y, z;
@@ -84,7 +86,7 @@ public class Playground {
 
             for (int i = 0; i < 424; i++) {
                 for (int j = 0; j < 512; j++) {
-                    fileWriter.write(map.realX[424 * i + j] + " " + map.realY[424 * i + j] + " " + map.realZ[424 * i + j] + "\n");
+//                    fileWriter.write(map.realX[424 * i + j] + " " + map.realY[424 * i + j] + " " + map.realZ[424 * i + j] + "\n");
                 }
             }
             fileWriter.close();
@@ -139,13 +141,13 @@ public class Playground {
 
 
         DepthModel depthModel = KinectDataStore.readDepthData("KinectData\\ibims.bin");
-        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
+//        DepthMap map = new DepthMap(512, 424, depthModel.getXYZ());
 
 
         ArrayList<Point3d> points = new ArrayList<>();
         for (int i = 0; i < 424; i++) {
             for (int j = 0; j < 512; j++) {
-                points.add(new Point3d(map.realX[424 * i + j], map.realY[424 * i + j], map.realZ[424 * i + j]));
+//                points.add(new Point3d(map.realX[424 * i + j], map.realY[424 * i + j], map.realZ[424 * i + j]));
             }
         }
 

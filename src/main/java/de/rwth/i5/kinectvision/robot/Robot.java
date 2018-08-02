@@ -120,6 +120,27 @@ public class Robot {
         return res;
     }
 
+    public static double getAnglePlanes(Vector3d e1v1, Vector3d e1v2, Vector3d e2v1, Vector3d e2v2) {
+        Vector3d normalE1 = new Vector3d();
+        normalE1.cross(e1v1, e1v2);
+        Vector3d normalE2 = new Vector3d();
+        normalE2.cross(e2v1, e2v2);
+        return normalE1.angle(normalE2);
+    }
+
+    private Matrix4d generateTranslationMatrix() {
+        return generateTranslationMatrix(robotModel.getBasePoints().get(0).getPosition(), bases.get(0).getPosition());
+    }
+
+    private Matrix4d generateTranslationMatrix(Vector3d from, Vector3d to) {
+        Matrix4d translationMatrix = new Matrix4d();
+        translationMatrix.setIdentity();
+        translationMatrix.m03 = to.x - from.x;
+        translationMatrix.m13 = to.y - from.y;
+        translationMatrix.m23 = to.z - from.z;
+        return translationMatrix;
+    }
+
     /**
      * This method generates a real world 3d representation of the robot.
      * Here the loaded robot model, the current axis orientations and the base positions are respected.
@@ -159,8 +180,7 @@ public class Robot {
         Vector3d m1m2 = new Vector3d(base2.getPosition().x - base1.getPosition().x, base2.getPosition().y - base1.getPosition().y, 0);
         Vector3d m1R2 = new Vector3d();
 
-        m1R2.add(robotModel.getBasePoints().get(1).getPosition());
-        m1R2.sub(robotModel.getBasePoints().get(0).getPosition());
+        m1R2.sub(robotModel.getBasePoints().get(1).getPosition(), robotModel.getBasePoints().get(0).getPosition());
         double radianAngle = m1R2.angle(m1m2);
 //        radianAngle = Math.toRadians(-Math.toDegrees(radianAngle));
         rotationMatrix.setIdentity();
@@ -179,12 +199,16 @@ public class Robot {
         Triangle.transformVector(translationMatrix, transformedM2);
         Triangle.transformVector(rotationMatrix, transformedM2);
 
-        Vector3d base1_2 = new Vector3d();
-        base1_2.sub(base2.getPosition(), base1.getPosition());
+        Vector3d r1r2 = new Vector3d();
+        r1r2.sub(base2.getPosition(), base1.getPosition());
         //The normal vector, we will rotate around it
         Vector3d crossProduct = new Vector3d();
-        crossProduct.cross(transformedM2, base1_2);
+        crossProduct.cross(transformedM2, r1r2);
         crossProduct.normalize();
+
+        Vector3d r1tm2 = new Vector3d();
+        r1tm2.sub(transformedM2, base1.getPosition());
+        radianAngle2 = r1r2.angle(r1tm2);
         Matrix4d rotationMatrix2 = rotationMatrixArbitraryAxis(radianAngle2, crossProduct);
 
         /*
@@ -206,6 +230,8 @@ public class Robot {
         Matrix4d translationMatrixRotation2 = generateTranslationMatrix(base1.getPosition(), new Vector3d());
         Matrix4d translationMatrixRotation2Negated = generateTranslationMatrix(new Vector3d(), base1.getPosition());
 
+
+//        Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis();
         Matrix4d transformationMatrix = new Matrix4d();
         transformationMatrix.setIdentity();
         transformationMatrix.mul(scaleMatrix);
@@ -220,18 +246,5 @@ public class Robot {
         }
 
         return res;
-    }
-
-    private Matrix4d generateTranslationMatrix() {
-        return generateTranslationMatrix(robotModel.getBasePoints().get(0).getPosition(), bases.get(0).getPosition());
-    }
-
-    private Matrix4d generateTranslationMatrix(Vector3d from, Vector3d to) {
-        Matrix4d translationMatrix = new Matrix4d();
-        translationMatrix.setIdentity();
-        translationMatrix.m03 = to.x - from.x;
-        translationMatrix.m13 = to.y - from.y;
-        translationMatrix.m23 = to.z - from.z;
-        return translationMatrix;
     }
 }

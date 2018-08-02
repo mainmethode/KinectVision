@@ -1,5 +1,4 @@
 import TestTools.KinectTestClient;
-import TestTools.VideoPanel;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.ImportResource;
 public class MqttKinectTest {
 
     static KinectClient kinectClient;
-    VideoPanel main_panel;
 
 
     public static void main(String args[]) {
