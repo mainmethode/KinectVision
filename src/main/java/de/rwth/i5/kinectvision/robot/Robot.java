@@ -34,6 +34,7 @@ public class Robot {
 //        robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
         robotModel.addBasePoint(new Marker3d(1, new Vector3d(-1f, -1f, -1f)));
         robotModel.addBasePoint(new Marker3d(2, new Vector3d(1f, -1f, -1f)));
+        robotModel.addBasePoint(new Marker3d(3, new Vector3d(-1, -1, 1)));
         robotModel.setArm(new Cube());
     }
 
@@ -194,7 +195,7 @@ public class Robot {
 
         //Rotation to fit to M2, Rotate about the normal vector of the spanned triangle
         //TODO other angle
-        double radianAngle2 = Math.toRadians(45);
+        double radianAngle2;
         Vector3d transformedM2 = new Vector3d(robotModel.getBasePoints().get(1).getPosition());
         Triangle.transformVector(translationMatrix, transformedM2);
         Triangle.transformVector(rotationMatrix, transformedM2);
@@ -229,11 +230,26 @@ public class Robot {
 
         Matrix4d translationMatrixRotation2 = generateTranslationMatrix(base1.getPosition(), new Vector3d());
         Matrix4d translationMatrixRotation2Negated = generateTranslationMatrix(new Vector3d(), base1.getPosition());
+        Vector3d tm3 = new Vector3d(robotModel.getBasePoints().get(2).getPosition());
+        Triangle.transformVector(translationMatrix, tm3);
+        Triangle.transformVector(rotationMatrix, tm3);
+        Triangle.transformVector(translationMatrixRotation2, tm3);
+        Triangle.transformVector(rotationMatrix2, tm3);
+        Triangle.transformVector(translationMatrixRotation2Negated, tm3);
 
+        Vector3d r1tm3 = new Vector3d();
+        r1tm3.sub(tm3, base1.getPosition());
+        Vector3d r1r3 = new Vector3d();
+        r1r3.sub(base3.getPosition(), base1.getPosition());
+        double radianAngle3 = getAnglePlanes(r1r2, r1r3, r1r2, r1tm3);
+        Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis(radianAngle3, r1r2);
 
-//        Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis();
+        //Create the transformation matrix by multiplying all matrices in reverse order
         Matrix4d transformationMatrix = new Matrix4d();
         transformationMatrix.setIdentity();
+        transformationMatrix.mul(translationMatrixRotation2Negated);
+        transformationMatrix.mul(rotationMatrix3);
+        transformationMatrix.mul(translationMatrixRotation2);
         transformationMatrix.mul(scaleMatrix);
         transformationMatrix.mul(translationMatrixRotation2Negated);
         transformationMatrix.mul(rotationMatrix2);
