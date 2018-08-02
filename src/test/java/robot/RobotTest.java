@@ -17,7 +17,13 @@ import static org.junit.Assert.assertTrue;
  * Class for testing the Robot class
  */
 public class RobotTest {
-    public static void createTestOutput(PolygonMesh p1, boolean col) {
+    /**
+     * Creates Creates 3d points for visualization
+     *
+     * @param p1  The polygon to display
+     * @param col Color red or blue
+     */
+    private static void createTestOutput(PolygonMesh p1, boolean col) {
         String color = col ? ";255;0;0" : ";0;0;255";
         for (Triangle triangle : p1) {
             System.out.println(triangle.a.x + ";" + triangle.a.y + ";" + triangle.a.z + color);
@@ -56,28 +62,10 @@ public class RobotTest {
 
         //reference 3d object is the robot before transformation
         PolygonMesh refObject = robot.getCombinedModel();
-        //Reference transformation matrix which is applied to the robot model for testing
-        Matrix4d transformationMatrix = new Matrix4d();
-        //Translation to move to M1
-        Matrix4d translationMatrix = new Matrix4d();
-        translationMatrix.setIdentity();
-        translationMatrix.m03 = 2;
-        translationMatrix.m13 = 2;
-        translationMatrix.m23 = 1;
-        //Rotation to fit to M2
-        Matrix4d rotationMatrix = new Matrix4d();
-        double radianAngle = Math.toRadians(45);
-        rotationMatrix.setIdentity();
-
-        rotationMatrix.m00 = Math.cos(radianAngle);
-        rotationMatrix.m01 = -Math.sin(radianAngle);
-        rotationMatrix.m03 = 1 * (1 - Math.cos(radianAngle)) + 1 * (Math.sin(radianAngle));
-
-        rotationMatrix.m10 = Math.sin(radianAngle);
-        rotationMatrix.m11 = Math.cos(radianAngle);
-        rotationMatrix.m13 = 1 * (1 - Math.cos(radianAngle)) - 1 * (Math.sin(radianAngle));
-
+        //Reference m1
         Vector3d referenceMarker1 = new Vector3d(-1, -1, -1);
+        //Reference m2
+        Vector3d referenceMarker2 = new Vector3d(1, -1, -1);
         //Scale to fit to M2
         Matrix4d scaleMatrix = new Matrix4d();
         double factor = 1.41421356;
@@ -87,13 +75,16 @@ public class RobotTest {
         scaleMatrix.m03 = 1 - 1.41421356;
         scaleMatrix.m13 = 1 - 1.41421356;
         scaleMatrix.m23 = (1 - 1.41421356) * 0;
+        Matrix4d transformationMatrix = new Matrix4d();
 
-        transformationMatrix.mul(scaleMatrix, rotationMatrix);
-        transformationMatrix.mul(translationMatrix);
-//        transformationMatrix.mul(rotationMatrix, translationMatrix);
-
+        //This matrix has been calculated beforehand
+        transformationMatrix.set(new double[]{0.99498743710662, -1.407124727947029, -0.9949874371066197, -0.4071247279470287,
+                0.9949874371066199, 1.4071247279470287, -0.9949874371066202, 2.4071247279470285,
+                1.407124727947029, 2.220446049250313E-16, 1.407124727947029, 2.814249455894058,
+                0.0, 0.0, 0.0, 1.0});
 
         Triangle.transformVector(transformationMatrix, referenceMarker1);
+        Triangle.transformVector(transformationMatrix, referenceMarker2);
 
         /*
         Marker 1 should not have been rotated
@@ -102,6 +93,12 @@ public class RobotTest {
         assertEquals(1, referenceMarker1.y, 0.1);
         assertEquals(0, referenceMarker1.z, 0.1);
 
+        /*
+        Marker 2 should be on a certain location
+         */
+        assertEquals(3, referenceMarker2.x, 0.1);
+        assertEquals(3, referenceMarker2.y, 0.1);
+        assertEquals(2.8, referenceMarker2.z, 0.1);
         //Apply the reference transformation matrix to every triangle
         for (Triangle triangle : refObject) {
             triangle.applyTransformation(transformationMatrix);
@@ -113,54 +110,47 @@ public class RobotTest {
 
         //Get the real world coordinates
         PolygonMesh testObj = robot.getCurrentRealWorldModel();
-//        System.out.println(testObj.getTriangles().size());
         int matches = 0;
         //Look for a matching triangle in the reference
         for (Triangle triangle : testObj) {
             for (Triangle refTriangle : refObject) {
                 if (triangle.equalsEps(refTriangle, 0.0001)) {
-                    System.out.println();
-                    System.out.println("match");
-                    System.out.println(triangle);
-                    System.out.println(refTriangle);
-                    System.out.println();
                     matches++;
                     break;
                 }
             }
-//            System.out.println(triangle);
         }
 
-        PolygonMesh out1 = robot.getCombinedModel();
+//        PolygonMesh out1 = robot.getCombinedModel();
 
-        System.out.println("OUTPUT");
-        createTestOutput(out1, false);
-        createTestOutput(testObj, true);
+//        createTestOutput(out1, false);
+//        createTestOutput(testObj, true);
         //Every triangle should have a match
         assertEquals(12, matches);
     }
 
-    //    @Test
-    public void testRotationMatrix() {
+    @Test
+    public void testRotationMatrix360Degrees() {
         Matrix4d rotationMatrix2;
         Vector3d vec = new Vector3d(1, 2, 3);
         vec.normalize();
         //The rotation Matrix
-        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(360, vec);
+        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(Math.toRadians(360), vec);
         //The resulting matrix should be (nearly) an identity matrix
         Matrix4d ref = new Matrix4d();
         ref.setIdentity();
         assertTrue(ref.epsilonEquals(rotationMatrix2, .000000001));
     }
 
-    //    @Test
-    public void testRotationMatrix45() {
+    @Test
+    public void testRotationMatrix90DegreesXAxis() {
         Matrix4d rotationMatrix2;
-        Vector3d vec = new Vector3d(0, 0, 0);
-        vec.normalize();
+        Vector3d axisVector = new Vector3d(1, 0, 0);
+        Vector3d vectorToRotate = new Vector3d(1, 1, 0);
         //The rotation Matrix
-//        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(Math.toRadians()45, vec);
-//        Triangle.transformVector(rotationMatrix2,vec);
-        assertEquals(new Vector3d(), vec);
+        rotationMatrix2 = Robot.rotationMatrixArbitraryAxis(Math.toRadians(90), axisVector);
+        Triangle.transformVector(rotationMatrix2, vectorToRotate);
+        assertTrue(new Vector3d(1, 0, 1).epsilonEquals(vectorToRotate, 0.1));
     }
+
 }

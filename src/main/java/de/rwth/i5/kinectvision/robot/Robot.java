@@ -52,11 +52,13 @@ public class Robot {
     /**
      * Creates the rotation matrix for a rotation about an arbitrary axis
      *
-     * @param radianAngle    The angle in rad
-     * @param axisNormalized Normalized axis vector
+     * @param radianAngle The angle in rad
+     * @param axis        Axis vector
      * @return The rotation matrix
      */
-    public static Matrix4d rotationMatrixArbitraryAxis(double radianAngle, Vector3d axisNormalized) {
+    public static Matrix4d rotationMatrixArbitraryAxis(double radianAngle, Vector3d axis) {
+        Vector3d axisNormalized = new Vector3d(axis);
+        axisNormalized.normalize();
         Matrix4d rotationMatrix2 = new Matrix4d();
 //        double radianAngle = Math.toRadians(degreeAngle);
         double cosA = Math.cos(radianAngle);
@@ -79,7 +81,7 @@ public class Robot {
         rotationMatrix2.m21 = b * c * K + a * sinA;
         rotationMatrix2.m22 = c * c * K + cosA;
 
-        rotationMatrix2.m33 = 0;
+        rotationMatrix2.m33 = 1;
         return rotationMatrix2;
     }
 
@@ -176,7 +178,6 @@ public class Robot {
         Vector3d transformedM2 = new Vector3d(robotModel.getBasePoints().get(1).getPosition());
         Triangle.transformVector(translationMatrix, transformedM2);
         Triangle.transformVector(rotationMatrix, transformedM2);
-        System.out.println("TT" + transformedM2);
 
         Vector3d base1_2 = new Vector3d();
         base1_2.sub(base2.getPosition(), base1.getPosition());
@@ -184,19 +185,6 @@ public class Robot {
         Vector3d crossProduct = new Vector3d();
         crossProduct.cross(transformedM2, base1_2);
         crossProduct.normalize();
-//        crossProduct.negate();
-
-//        Vector3d transformedM2 = new Vector3d(base2.getPosition());
-//        transformedM2.z = robotModel.getBasePoints().get(1).getPosition().z + translationMatrix.m23;
-//
-//        Vector3d tm2m1 = new Vector3d();
-//        tm2m1.sub(transformedM2, base1.getPosition());
-//        Vector3d r1r2 = new Vector3d();
-//        r1r2.sub(base2.getPosition(), base1.getPosition());
-//
-//        radianAngle2 = r1r2.angle(tm2m1);
-//        System.out.println("ANGLE " + Math.toDegrees(radianAngle2));
-//        System.out.println(transformedM2);
         Matrix4d rotationMatrix2 = rotationMatrixArbitraryAxis(radianAngle2, crossProduct);
 
         /*
@@ -214,26 +202,23 @@ public class Robot {
         //Generate the scale matrix
         Matrix4d scaleMatrix = getScaleMatrix(base1.getPosition(), scaleFactor);
 
-        Matrix4d transformationMatrix = new Matrix4d();
 
         Matrix4d translationMatrixRotation2 = generateTranslationMatrix(base1.getPosition(), new Vector3d());
         Matrix4d translationMatrixRotation2Negated = generateTranslationMatrix(new Vector3d(), base1.getPosition());
 
-        transformationMatrix.mul(scaleMatrix, translationMatrixRotation2Negated);
+        Matrix4d transformationMatrix = new Matrix4d();
+        transformationMatrix.setIdentity();
+        transformationMatrix.mul(scaleMatrix);
+        transformationMatrix.mul(translationMatrixRotation2Negated);
         transformationMatrix.mul(rotationMatrix2);
-//        transformationMatrix.mul(translationMatrixRotation2);
+        transformationMatrix.mul(translationMatrixRotation2);
         transformationMatrix.mul(rotationMatrix);
         transformationMatrix.mul(translationMatrix);
+
         for (Triangle re : res) {
             re.applyTransformation(transformationMatrix);
         }
 
-        Vector3d vec = new Vector3d(-1, -1, 0);
-        System.out.println("HAEHLEO" + vec);
-        Triangle.transformVector(translationMatrixRotation2, vec);
-        System.out.println("HAEHLEO" + vec);
-        Triangle.transformVector(translationMatrixRotation2Negated, vec);
-        System.out.println("HAEHLEO" + vec);
         return res;
     }
 
