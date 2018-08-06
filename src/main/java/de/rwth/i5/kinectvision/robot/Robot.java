@@ -1,6 +1,9 @@
 package de.rwth.i5.kinectvision.robot;
 
-import de.rwth.i5.kinectvision.machinevision.model.*;
+import de.rwth.i5.kinectvision.machinevision.model.Cube;
+import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
+import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.vecmath.Matrix4d;
@@ -13,6 +16,7 @@ import java.util.ArrayList;
 @Slf4j
 public class Robot {
     private RobotModel robotModel;
+
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
