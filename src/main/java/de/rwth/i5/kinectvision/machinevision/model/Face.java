@@ -72,7 +72,6 @@ public class Face {
         b = new Vector3d(this.b.x, this.b.y, this.b.z);
         c = new Vector3d(this.c.x, this.c.y, this.c.z);
         d = new Vector3d(this.d.x, this.d.y, this.d.z);
-        Face res = new Face(a, b, c, d);
-        return res;
+        return new Face(a, b, c, d);
     }
 }

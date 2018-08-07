@@ -64,6 +64,7 @@ public class RobotTest {
 
         //reference 3d object is the robot before transformation
         PolygonMesh refObject = robot.getCombinedModel();
+        System.out.println(refObject);
         //Reference m1
         Vector3d referenceMarker1 = new Vector3d(-1, -1, -1);
         //Reference m2
@@ -120,7 +121,7 @@ public class RobotTest {
         //        createTestOutput(out1, false);
         //        createTestOutput(testObj, true);
         //Every triangle should have a match
-        assertEquals(12, matches);
+        assertEquals(6, matches);
     }
 
     //    @Test
@@ -181,7 +182,8 @@ public class RobotTest {
     public void testRealWorldTransformationEveryAxis() {
         //Initialize the robot
         Robot robot = new Robot();
-        robot.generateSampleRobotModel();
+//        robot.generateSampleRobotModel();
+        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
         /*
         Initialize markers
          */
@@ -201,6 +203,8 @@ public class RobotTest {
 
         //reference 3d object is the robot before transformation
         PolygonMesh refObject = robot.getCombinedModel();
+        assertEquals(6, refObject.getFaces().size());
+        System.out.println(refObject);
         //Reference m1
         Vector3d referenceMarker1 = new Vector3d(-1, -1, -1);
         //Reference m2
@@ -251,9 +255,11 @@ public class RobotTest {
 
         //Get the real world coordinates
         PolygonMesh testObj = robot.getCurrentRealWorldModel();
+        assertEquals(6, testObj.getFaces().size());
         int matches = 0;
         //Look for a matching triangle in the reference
         for (Face triangle : testObj) {
+            System.out.println(triangle);
             for (Face refTriangle : refObject) {
                 if (triangle.equalsEps(refTriangle, 0.4001)) {
                     matches++;
@@ -262,11 +268,11 @@ public class RobotTest {
             }
         }
 
-        //        PolygonMesh out1 = robot.getCombinedModel();
+        PolygonMesh out1 = robot.getCombinedModel();
 
-        //        createTestOutput(out1, false);
-        //        createTestOutput(testObj, true);
+        createTestOutput(out1, false);
+        createTestOutput(testObj, true);
         //Every triangle should have a match
-        assertEquals(12, matches);
+        assertEquals(6, matches);
     }
 }
