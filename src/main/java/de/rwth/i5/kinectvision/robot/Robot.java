@@ -1,13 +1,17 @@
 package de.rwth.i5.kinectvision.robot;
 
-import de.rwth.i5.kinectvision.machinevision.model.Cube;
+import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import lombok.extern.slf4j.Slf4j;
+import org.xml.sax.SAXException;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -39,7 +43,7 @@ public class Robot {
         robotModel.addBasePoint(new Marker3d(1, new Vector3d(-1f, -1f, -1f)));
         robotModel.addBasePoint(new Marker3d(2, new Vector3d(1f, -1f, -1f)));
         robotModel.addBasePoint(new Marker3d(3, new Vector3d(-1, -1, 1)));
-        robotModel.setArm(new Cube());
+//        robotModel.setArm(new Cube());
     }
 
 
@@ -121,7 +125,10 @@ public class Robot {
         Whole model generation respecting the current axis orientations
          */
         //Add all robot parts to the resulting model
-        res.combine(robotModel.getArm());
+        for (RobotPart rp : this.robotModel.getRobotParts()) {
+            res.combine(rp.getBoundingBox());
+        }
+
         return res;
     }
 
@@ -154,12 +161,14 @@ public class Robot {
      * @return A real-world 3d representation of the robot with its current configuration.
      */
     public PolygonMesh getCurrentRealWorldModel() {
-        PolygonMesh res = new PolygonMesh();
+
         /*
-        Whole model generation respecting the current axis orientations
+        TODO Whole model generation respecting the current axis orientations
          */
+        PolygonMesh res = getCombinedModel();
         //Add all robot parts to the resulting model
-        res.combine(robotModel.getArm());
+//        res.combine(robotModel.getArm());
+
         /*
         Transformation
          */
@@ -198,7 +207,6 @@ public class Robot {
         rotationMatrix.m13 = base1.getPosition().y * (1 - Math.cos(radianAngle)) - base1.getPosition().x * (Math.sin(radianAngle));
 
         //Rotation to fit to M2, Rotate about the normal vector of the spanned triangle
-        //TODO other angle
         double radianAngle2;
         Vector3d transformedM2 = new Vector3d(robotModel.getBasePoints().get(1).getPosition());
         Triangle.transformVector(translationMatrix, transformedM2);
@@ -261,10 +269,25 @@ public class Robot {
         transformationMatrix.mul(rotationMatrix);
         transformationMatrix.mul(translationMatrix);
 
-        for (Triangle re : res) {
+        for (Face re : res) {
             re.applyTransformation(transformationMatrix);
         }
 
         return res;
     }
+
+    /**
+     * Generates the robot from files
+     *
+     * @param path The path containing the folder with the files
+     */
+    public void generateFromFiles(String path) {
+        log.info("Generate from file");
+        try {
+            this.robotModel = ModelFileParser.parseBaseFile(new File(path + "base.x3d"));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

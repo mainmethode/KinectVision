@@ -1,6 +1,8 @@
 package de.rwth.i5.kinectvision.robot;
 
 import de.rwth.i5.kinectvision.machinevision.model.Face;
+import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
+import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -29,21 +31,147 @@ public class ModelFileParser {
      * @param file The file to be parsed
      * @return The generated model file
      */
-    public static RobotModel parseModelFile(File file) throws ParserConfigurationException, IOException, SAXException {
-
+    public static RobotPart parseModelFile(File file) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(file);
         doc.getDocumentElement().normalize();
         System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
         NodeList nList = doc.getElementsByTagName("Group");
-        for (int i = 0; i < nList.getLength(); i++) {
-            System.out.println(nList.item(i));
-//            handleCoordinates(nList.item(i));
-            handleGroup(nList.item(i));
+
+        //If there is no group element
+        if (nList.getLength() == 0) {
+            log.error("No element \"Group\" found.");
+            return null;
         }
-        System.out.println("----------------------------");
-        return null;
+
+        RobotPart arm = handleGroup(nList.item(0));
+        if (arm == null) {
+            log.error("Arm could not be generated");
+            return null;
+        }
+        NodeList transformList = doc.getElementsByTagName("Transform");
+
+        for (int i = 0; i < transformList.getLength(); i++) {
+            handleAxisDummy(arm, transformList.item(i));
+        }
+
+        return arm;
+    }
+
+    /**
+     * This method parses the 3d file for the robot base containing the
+     * base bounding box, two dummies for the rotation and multiple dummies for markers
+     *
+     * @param file The file to be parsed
+     * @return A robot model containing the base bounding box, the first rotation axis and the markers
+     */
+    public static RobotModel parseBaseFile(File file) throws IOException, SAXException, ParserConfigurationException {
+        log.info("Parse base file");
+        RobotModel res = new RobotModel();
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(file);
+        doc.getDocumentElement().normalize();
+        System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+        NodeList nList = doc.getElementsByTagName("Group");
+
+        //If there is no group element
+        if (nList.getLength() == 0) {
+            log.error("No element \"Group\" found.");
+            return null;
+        }
+
+        RobotPart base = handleGroup(nList.item(0));
+        if (base == null) {
+            log.error("Base could not be generated");
+            return null;
+        }
+        res.addRobotPart(base);
+        NodeList transformList = doc.getElementsByTagName("Transform");
+
+        for (int i = 0; i < transformList.getLength(); i++) {
+            handleAxisDummy(base, transformList.item(i));
+            handleMarkerDummy(res, transformList.item(i));
+        }
+
+        return res;
+    }
+
+    /**
+     * Adds a base position to the robot model if there is a marker dummy in the node
+     *
+     * @param res  The robot model to change
+     * @param node The node containing the information
+     */
+
+    private static void handleMarkerDummy(RobotModel res, Node node) {
+        log.info("Handle marker dummy");
+        //Get the object's name
+        String name = node.getAttributes().getNamedItem("DEF").getNodeValue();
+        String translation = node.getAttributes().getNamedItem("translation").getNodeValue();
+
+        if (!name.startsWith("marker_")) {
+            return;
+        }
+
+        String[] splitted = name.split("_");
+        if (splitted.length < 2) {
+            return;
+        }
+        int markerID;
+        try {
+            markerID = Integer.parseInt(splitted[1]);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        res.addBasePoint(new Marker3d(markerID, parseTranslationString(translation)));
+        log.info("Base point created: " + res.getBasePoints().get(res.getBasePoints().size() - 1));
+    }
+
+    /**
+     * Handles the transformation containing empties.
+     *
+     * @param arm  The robot arm to set the axis for
+     * @param node Node containing the transformation
+     */
+    private static void handleAxisDummy(RobotPart arm, Node node) {
+        //Get the object's name
+        String name = node.getAttributes().getNamedItem("DEF").getNodeValue();
+        String translation = node.getAttributes().getNamedItem("translation").getNodeValue();
+
+        switch (name) {
+            case "link_start_1_TRANSFORM":
+                arm.setAxis1Start(parseTranslationString(translation));
+                break;
+            case "link_start_2_TRANSFORM":
+                arm.setAxis2Start(parseTranslationString(translation));
+                break;
+            case "link_end_1_TRANSFORM":
+                arm.setAxis1End(parseTranslationString(translation));
+                break;
+            case "link_end_2_TRANSFORM":
+                arm.setAxis2End(parseTranslationString(translation));
+                break;
+        }
+    }
+
+    /**
+     * Parses a string containing coordinates and returns a new Vector
+     *
+     * @param translation The string to parse
+     * @return The vector containing the coordinates
+     */
+    private static Vector3d parseTranslationString(String translation) {
+        List<Double> values = Arrays.stream(translation.split(" ")).map(Double::parseDouble).collect(Collectors.toList());
+        if (values.size() < 3) {
+            log.error("Translation is invalid. Size < 3");
+            return null;
+        }
+        Vector3d res = new Vector3d(values.get(0), values.get(1), values.get(2));
+        return res;
     }
 
     /**
@@ -51,7 +179,7 @@ public class ModelFileParser {
      *
      * @param node
      */
-    private static void handleGroup(Node node) {
+    private static RobotPart handleGroup(Node node) {
         log.debug("Handle group");
 
         //Get the cube name
@@ -60,19 +188,19 @@ public class ModelFileParser {
         Node shape = findItem("Shape", node.getChildNodes());
         if (shape == null) {
             log.error("No shape found in file.");
-            return;
+            return null;
         }
 
         Node indexSet = findItem("IndexedFaceSet", shape.getChildNodes());
         if (indexSet == null) {
             log.error("No IndexFaceSet found in file.");
-            return;
+            return null;
         }
 
         Node coordinate = findItem("Coordinate", indexSet.getChildNodes());
         if (coordinate == null) {
             log.error("No coordinate found in file.");
-            return;
+            return null;
         }
         //Get the coordinate indices for the faces
         String coordIndex = indexSet.getAttributes().getNamedItem("coordIndex").getNodeValue();
@@ -88,10 +216,13 @@ public class ModelFileParser {
         //Create faces
         ArrayList<Face> faces = generateFaces(vector3ds, coordinateIndexes);
 
-        RobotArm arm = new RobotArm();
-        arm.getBoundingBox().setFaces(faces);
+        RobotPart arm = new RobotPart();
+        PolygonMesh box = new PolygonMesh();
+        box.setFaces(faces);
+        arm.setBoundingBox(box);
         arm.setName(name);
-        System.out.println(faces);
+        log.debug(arm.toString());
+        return arm;
     }
 
 

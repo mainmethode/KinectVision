@@ -1,5 +1,6 @@
 package robot;
 
+import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
@@ -25,7 +26,7 @@ public class RobotTest {
      */
     private static void createTestOutput(PolygonMesh p1, boolean col) {
         String color = col ? ";255;0;0" : ";0;0;255";
-        for (Triangle triangle : p1) {
+        for (Face triangle : p1) {
             System.out.println(triangle.a.x + ";" + triangle.a.y + ";" + triangle.a.z + color);
             System.out.println(triangle.b.x + ";" + triangle.b.y + ";" + triangle.b.z + color);
             System.out.println(triangle.c.x + ";" + triangle.c.y + ";" + triangle.c.z + color);
@@ -43,11 +44,11 @@ public class RobotTest {
     public void testRealWorldTransformationTwoRotations() {
         //Initialize the robot
         Robot robot = new Robot();
-        robot.generateSampleRobotModel();
+//        robot.generateSampleRobotModel();
         /*
         Initialize markers
          */
-
+        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
         ArrayList<Marker3d> markers = new ArrayList<>();
         Marker3d marker1 = new Marker3d(1d, 1d, 0d, 1);
         markers.add(marker1);
@@ -93,7 +94,7 @@ public class RobotTest {
         assertEquals(3, referenceMarker2.y, 0.1);
         assertEquals(2.8, referenceMarker2.z, 0.1);
         //Apply the reference transformation matrix to every triangle
-        for (Triangle triangle : refObject) {
+        for (Face triangle : refObject) {
             triangle.applyTransformation(transformationMatrix);
         }
 
@@ -105,8 +106,8 @@ public class RobotTest {
         PolygonMesh testObj = robot.getCurrentRealWorldModel();
         int matches = 0;
         //Look for a matching triangle in the reference
-        for (Triangle triangle : testObj) {
-            for (Triangle refTriangle : refObject) {
+        for (Face triangle : testObj) {
+            for (Face refTriangle : refObject) {
                 if (triangle.equalsEps(refTriangle, 0.40001)) {
                     matches++;
                     break;
@@ -240,7 +241,7 @@ public class RobotTest {
 //        assertEquals(marker3.getPosition().y, referenceMarker3.y, 0.1);
 //        assertEquals(marker3.getPosition().z, referenceMarker3.z, 0.1);
         //Apply the reference transformation matrix to every triangle
-        for (Triangle triangle : refObject) {
+        for (Face triangle : refObject) {
             triangle.applyTransformation(transformationMatrix);
         }
 
@@ -252,8 +253,8 @@ public class RobotTest {
         PolygonMesh testObj = robot.getCurrentRealWorldModel();
         int matches = 0;
         //Look for a matching triangle in the reference
-        for (Triangle triangle : testObj) {
-            for (Triangle refTriangle : refObject) {
+        for (Face triangle : testObj) {
+            for (Face refTriangle : refObject) {
                 if (triangle.equalsEps(refTriangle, 0.4001)) {
                     matches++;
                     break;

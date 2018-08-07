@@ -3,9 +3,9 @@ import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
+import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
-import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
 import georegression.struct.point.Point3D_F32;
 import org.junit.Test;
@@ -169,10 +169,11 @@ public class Playground {
                 w.write(point3d.x + " " + point3d.y + " " + point3d.z + " 10 10 10\n");
             }
 
-            for (Triangle triangle : roboModel) {
+            for (Face triangle : roboModel) {
                 w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + " 255 0 0\n");
                 w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + " 255 0 0\n");
                 w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + " 255 0 0\n");
+                w.write(triangle.d.x + " " + triangle.d.y + " " + triangle.d.z + " 255 0 0\n");
             }
 
 

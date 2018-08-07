@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.vecmath.Vector3d;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -29,5 +30,19 @@ public class Marker3d {
                 "id=" + id +
                 ", position=" + position +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Marker3d marker3d = (Marker3d) o;
+        return id == marker3d.id &&
+                Objects.equals(position, marker3d.position);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, position);
     }
 }

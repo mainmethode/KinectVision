@@ -51,7 +51,7 @@ public class Cube extends PolygonMesh {
 
         }
         for (int i = 0; i < 36; i += 3) {
-            triangles.add(new Triangle(vecs.get(i), vecs.get(i + 1), vecs.get(i + 2)));
+//            faces.add(new Triangle(vecs.get(i), vecs.get(i + 1), vecs.get(i + 2)));
         }
     }
 }
