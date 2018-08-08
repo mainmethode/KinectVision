@@ -3,7 +3,6 @@ package robot;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.robot.ModelFileParser;
 import de.rwth.i5.kinectvision.robot.RobotModel;
-import de.rwth.i5.kinectvision.robot.RobotPart;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -16,23 +15,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class ModelFileParserTest {
+
+
     @Test
-    public void testFileParse() {
+    public void testParseFile() {
+        RobotModel robotModel = null;
         try {
-            RobotPart arm = ModelFileParser.parseModelFile(new File("C:\\Users\\Justin\\Desktop\\link.x3d"));
-            System.out.println(arm.toString());
+            robotModel = ModelFileParser.parseFile(new File("C:\\Users\\Justin\\Desktop\\sample_robot.x3d"));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
 
-//        String coordIndex = "1 2 3 4 5 6 ";
-//        List<Integer> coordinateIndexes = Arrays.stream(coordIndex.split(" ")).map(Integer::parseInt)
-//                .collect(Collectors.toList());
+        assertNotNull(robotModel);
+        assertNotNull(robotModel.getBasePoints());
+        assertNotNull(robotModel.getRobotParts());
+        assertNotNull(robotModel.getAxes());
+
+        assertEquals(new Vector3d(0, 1, 0), robotModel.getAxes()[0].getStart());
+        assertEquals(3, robotModel.getRobotParts().size());
     }
 
-    @Test
+    //    @Test
     public void testBaseCreation() throws ParserConfigurationException, SAXException, IOException {
-        RobotModel robotModel = ModelFileParser.parseBaseFile(new File(("C:\\Users\\Justin\\Desktop\\base.x3d")));
+        RobotModel robotModel = ModelFileParser.parseFile(new File(("C:\\Users\\Justin\\Desktop\\base.x3d")));
         assertNotNull(robotModel);
         assertNotNull(robotModel.getRobotParts());
         assertEquals(1, robotModel.getRobotParts().size());

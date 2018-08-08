@@ -25,7 +25,7 @@ public class RobotClient {
      */
     public void dataReceive() {
         //TODO
-        robot.changePosition(-1);
+//        robot.changePosition(-1);
         /*
 
 onChange: (coords, angles, ...)

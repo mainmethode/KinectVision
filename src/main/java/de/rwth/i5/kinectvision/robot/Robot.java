@@ -20,15 +20,18 @@ import java.util.ArrayList;
 @Slf4j
 public class Robot {
     private RobotModel robotModel;
+    double[] angles = new double[6];
 
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
-     * This method is called when the robot changed its position
-     * TODO: This is just a dummy method. We do not know how the robot behaves yet.
+     * Sets the angle of the given axis
+     *
+     * @param axis  The axis number (beginning from 0, base-first element axis)
+     * @param angle The angle to be set
      */
-    public void changePosition(int dummyVal) {
-
+    public void setAxisAngle(int axis, double angle) {
+        angles[axis] = angle;
     }
 
     //TODO load model and add parameter for model (file) in method
@@ -39,24 +42,22 @@ public class Robot {
     public void generateSampleRobotModel() {
         //Creates a standard cube
         robotModel = new RobotModel();
-//        robotModel.setBasePoint1(new Vector3d(-1, -1, -1));
         robotModel.addBasePoint(new Marker3d(1, new Vector3d(-1f, -1f, -1f)));
         robotModel.addBasePoint(new Marker3d(2, new Vector3d(1f, -1f, -1f)));
         robotModel.addBasePoint(new Marker3d(3, new Vector3d(-1, -1, 1)));
-//        robotModel.setArm(new Cube());
     }
 
 
     /**
-     * Sets the location of the first base position (this is where the first marker positions is).
+     * This method returns a model of the robot in its current orientation (the axis angles)
      *
-     * @param basePosition The center position of the first marker in real world coordinates.
+     * @return The model of the robot
      */
-    public void setRealWorldBasePosition1(Marker3d basePosition) {
-//        this.basePosition1 = basePosition;
-    }
+    public PolygonMesh getRobotWithOrientation() {
 
-    //TODO: Set other base positions (one is not enough of course)
+        log.error("Not implemented yet. getRobotWithOrientation");
+        return null;
+    }
 
     /**
      * Creates the rotation matrix for a rotation about an arbitrary axis
@@ -284,7 +285,7 @@ public class Robot {
     public void generateFromFiles(String path) {
         log.info("Generate from file");
         try {
-            this.robotModel = ModelFileParser.parseBaseFile(new File(path + "base.x3d"));
+            this.robotModel = ModelFileParser.parseFile(new File(path + "base.x3d"));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }

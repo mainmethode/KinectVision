@@ -3,7 +3,9 @@ package de.rwth.i5.kinectvision.robot;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
 /**
@@ -12,7 +14,12 @@ import java.util.ArrayList;
  */
 @Getter
 @Setter
+@Slf4j
 public class RobotModel {
+    /**
+     * Array containing the axis
+     */
+    private Axis[] axes = new Axis[3];
     /**
      * The bounding boxes represent the bounds of the arms.
      **/
@@ -38,5 +45,27 @@ public class RobotModel {
      */
     public void addRobotPart(RobotPart part) {
         robotParts.add(part);
+    }
+
+    /**
+     * Adds a new position to the axes array
+     *
+     * @param index    The index of the axis
+     * @param start    True if it is a start vector, false if end
+     * @param position The position to be set
+     */
+    public void addAxis(int index, boolean start, Vector3d position) {
+        if (index > axes.length - 1) {
+            log.error("Index out of bounds for axis");
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        if (axes[index] == null) {
+            axes[index] = new Axis();
+        }
+        if (start) {
+            axes[index].setStart(position);
+        } else {
+            axes[index].setEnd(position);
+        }
     }
 }

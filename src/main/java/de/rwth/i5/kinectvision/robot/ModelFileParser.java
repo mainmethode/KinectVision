@@ -26,47 +26,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelFileParser {
     /**
-     * Parses the given model file and creates a robot model containing the bounding boxes
-     *
-     * @param file The file to be parsed
-     * @return The generated model file
-     */
-    public static RobotPart parseModelFile(File file) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(file);
-        doc.getDocumentElement().normalize();
-        System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
-        NodeList nList = doc.getElementsByTagName("Group");
-
-        //If there is no group element
-        if (nList.getLength() == 0) {
-            log.error("No element \"Group\" found.");
-            return null;
-        }
-
-        RobotPart arm = handleGroup(nList.item(0));
-        if (arm == null) {
-            log.error("Arm could not be generated");
-            return null;
-        }
-        NodeList transformList = doc.getElementsByTagName("Transform");
-
-        for (int i = 0; i < transformList.getLength(); i++) {
-            handleAxisDummy(arm, transformList.item(i));
-        }
-
-        return arm;
-    }
-
-    /**
      * This method parses the 3d file for the robot base containing the
      * base bounding box, two dummies for the rotation and multiple dummies for markers
      *
      * @param file The file to be parsed
      * @return A robot model containing the base bounding box, the first rotation axis and the markers
      */
-    public static RobotModel parseBaseFile(File file) throws IOException, SAXException, ParserConfigurationException {
+    public static RobotModel parseFile(File file) throws IOException, SAXException, ParserConfigurationException {
         log.info("Parse base file");
         RobotModel res = new RobotModel();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -82,16 +48,19 @@ public class ModelFileParser {
             return null;
         }
 
-        RobotPart base = handleGroup(nList.item(0));
-        if (base == null) {
-            log.error("Base could not be generated");
-            return null;
+        //Handle every group item for the 3d models
+        for (int i = 0; i < nList.getLength(); i++) {
+            RobotPart part = handleGroup(nList.item(i));
+            res.addRobotPart(part);
         }
-        res.addRobotPart(base);
+
+        /*
+         * Handle the dummys to get the axis
+         */
         NodeList transformList = doc.getElementsByTagName("Transform");
 
         for (int i = 0; i < transformList.getLength(); i++) {
-            handleAxisDummy(base, transformList.item(i));
+            handleAxisDummy(res, transformList.item(i));
             handleMarkerDummy(res, transformList.item(i));
         }
 
@@ -134,28 +103,30 @@ public class ModelFileParser {
     /**
      * Handles the transformation containing empties.
      *
-     * @param arm  The robot arm to set the axis for
-     * @param node Node containing the transformation
+     * @param robotModel The robot model to set the axis for
+     * @param node       Node containing the transformation
      */
-    private static void handleAxisDummy(RobotPart arm, Node node) {
+    private static void handleAxisDummy(RobotModel robotModel, Node node) {
+        log.info("Handle axis dummy");
         //Get the object's name
         String name = node.getAttributes().getNamedItem("DEF").getNodeValue();
-        String translation = node.getAttributes().getNamedItem("translation").getNodeValue();
-
-        switch (name) {
-            case "link_start_1_TRANSFORM":
-                arm.setAxis1Start(parseTranslationString(translation));
-                break;
-            case "link_start_2_TRANSFORM":
-                arm.setAxis2Start(parseTranslationString(translation));
-                break;
-            case "link_end_1_TRANSFORM":
-                arm.setAxis1End(parseTranslationString(translation));
-                break;
-            case "link_end_2_TRANSFORM":
-                arm.setAxis2End(parseTranslationString(translation));
-                break;
+        Node element = node.getAttributes().getNamedItem("translation");
+        if (element == null) {
+            log.info("Element is null");
+            return;
         }
+        String translation = element.getNodeValue();
+        if (!name.startsWith("axis_")) {
+            log.info("Element not beginning with axis");
+            return;
+        }
+
+        log.info("Found an axis");
+        String[] splitted = name.split("_");
+        Vector3d position = parseTranslationString(translation);
+        int index = Integer.parseInt(splitted[1]);
+        robotModel.addAxis(index, splitted[2].equals("start"), position);
+        log.info("Axis generated." + position);
     }
 
     /**

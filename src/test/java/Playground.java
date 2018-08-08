@@ -4,7 +4,6 @@ import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.Face;
-import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.robot.Robot;
 import georegression.struct.point.Point3D_F32;
@@ -157,7 +156,6 @@ public class Playground {
         Robot robot = new Robot();
         robot.generateSampleRobotModel();
         //Place the model inside the model
-        robot.setRealWorldBasePosition1(new Marker3d(-0.5, -0.15, 1.8, 5));
 
         /*
         Create visualization
