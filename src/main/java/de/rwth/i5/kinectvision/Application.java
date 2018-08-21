@@ -1,6 +1,7 @@
 package de.rwth.i5.kinectvision;
 
 
+import de.rwth.i5.kinectvision.analysis.Evaluation;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.robot.RobotClient;
@@ -43,6 +44,12 @@ public class Application implements CommandLineRunner {
          */
         RobotClient robotClient = new RobotClient();
         handler.setRobot(robotClient.getRobot());
+
+        /*
+         * Initialize the evaluator
+         */
+        Evaluation evaluation = new Evaluation();
+        handler.setEvaluation(evaluation);
 
     }
 

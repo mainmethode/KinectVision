@@ -1,4 +1,4 @@
-import TestTools.KinectTestClient;
+import TestTools.KinectVisualizationClient;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,7 @@ public class MqttKinectTest {
         kinectClient.setClientId("asdf");
         kinectClient.setDepthTopic("asdf");
 
-        KinectTestClient myKinect = new KinectTestClient(kinectClient);
+        KinectVisualizationClient myKinect = new KinectVisualizationClient(kinectClient);
     }
 
 }

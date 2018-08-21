@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class loads the robot 3D model, handles all incoming robot events and moves the model accordingly.
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 @Slf4j
 public class Robot {
     private RobotModel robotModel;
-    double[] angles = new double[6];
+    private double[] angles = new double[3];
 
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
@@ -54,9 +55,34 @@ public class Robot {
      * @return The model of the robot
      */
     public PolygonMesh getRobotWithOrientation() {
+        //The resulting model
+        PolygonMesh res = new PolygonMesh();
+        //Iterate over every part of the robot
+        List<RobotPart> partList = robotModel.getRobotParts();
+
+        //First add the base
+        for (RobotPart robotPart : partList) {
+            if (robotPart.getName().startsWith("base")) {
+                res.combine(robotPart.getBoundingBox());
+                break;
+            }
+        }
+
+        Matrix4d rotationMatrix = new Matrix4d();
+
+        rotationMatrix.setIdentity();
+
+        for (RobotPart robotPart : partList) {
+            Matrix4d calcMatrix = new Matrix4d();
+            calcMatrix.mul(rotationMatrix);
+            res.combine(PolygonMesh.transform(calcMatrix, robotPart.getBoundingBox()));
+            rotationMatrix = calcMatrix;
+            //TODO: Check if Matrix order is right
+            //TODO: Check if the order of robotParts is right
+        }
 
         log.error("Not implemented yet. getRobotWithOrientation");
-        return null;
+        return res;
     }
 
     /**
