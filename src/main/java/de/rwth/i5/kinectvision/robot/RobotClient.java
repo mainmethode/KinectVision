@@ -1,12 +1,14 @@
 package de.rwth.i5.kinectvision.robot;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class for handling the communication from and to the robot
  */
 public class RobotClient {
     @Getter
+    @Setter
     private Robot robot;
 
     /**
@@ -14,8 +16,8 @@ public class RobotClient {
      */
     public void initialize() {
         //TODO Robot file String
-        robot = new Robot();
-        robot.generateSampleRobotModel();
+//        robot = new Robot();
+//        robot.generateSampleRobotModel();
 
         //Establish connection
     }

@@ -4,6 +4,7 @@ import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.xml.sax.SAXException;
 
@@ -22,7 +23,7 @@ import java.util.List;
 public class Robot {
     private RobotModel robotModel;
     private double[] angles = new double[3];
-
+    @Getter
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
@@ -200,14 +201,14 @@ public class Robot {
         Transformation
          */
         //Get the base points
-        if (bases.size() < 3) {
+        if (bases.size() < 2) {
             log.error("Not enough (" + bases.size() + ") marker positions set for the robot. At least 3 needed!");
             return null;
         }
         Marker3d base1, base2, base3;
         base1 = bases.get(0);
         base2 = bases.get(1);
-        base3 = bases.get(2);
+//        base3 = bases.get(2);
         /*
         Create transformation matrix
          */
@@ -278,16 +279,17 @@ public class Robot {
 
         Vector3d r1tm3 = new Vector3d();
         r1tm3.sub(tm3, base1.getPosition());
+       /*
         Vector3d r1r3 = new Vector3d();
         r1r3.sub(base3.getPosition(), base1.getPosition());
         double radianAngle3 = getAnglePlanes(r1r2, r1r3, r1r2, r1tm3);
         Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis(radianAngle3, r1r2);
-
+*/
         //Create the transformation matrix by multiplying all matrices in reverse order
         Matrix4d transformationMatrix = new Matrix4d();
         transformationMatrix.setIdentity();
         transformationMatrix.mul(translationMatrixRotation2Negated);
-        transformationMatrix.mul(rotationMatrix3);
+//        transformationMatrix.mul(rotationMatrix3);
         transformationMatrix.mul(translationMatrixRotation2);
         transformationMatrix.mul(scaleMatrix);
         transformationMatrix.mul(translationMatrixRotation2Negated);
@@ -306,12 +308,12 @@ public class Robot {
     /**
      * Generates the robot from files
      *
-     * @param path The path containing the folder with the files
+     * @param file The file
      */
-    public void generateFromFiles(String path) {
+    public void generateFromFiles(File file) {
         log.info("Generate from file");
         try {
-            this.robotModel = ModelFileParser.parseFile(new File(path + "base.x3d"));
+            this.robotModel = ModelFileParser.parseFile(file);
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }

@@ -1,12 +1,18 @@
 import TestTools.KinectDataStore;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
+import de.rwth.i5.kinectvision.analysis.Evaluation;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.mqtt.KinectClient;
+import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.robot.Robot;
+import de.rwth.i5.kinectvision.robot.RobotModel;
+import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
@@ -132,7 +138,7 @@ public class Playground {
      * This is a testing method for placing the robot in the point cloud. For this the point cloud and also the robot 3d model
      * are being exported as a xyz file. The marker positions are also included.
      */
-    @Test
+//    @Test
     public void testRobotInPointCloud() {
         /*
         Load point cloud
@@ -178,6 +184,82 @@ public class Playground {
             w.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    //    @Test
+    public void extractXYZ() {
+        DepthModel o = KinectDataStore.readDepthData("KinectData\\ibims.bin");
+        float x, y, z;
+        float xmin = 0, xmax = 0;
+        float ymin = 0, ymax = 0;
+        float zmin = 0, zmax = 0;
+
+        DepthMap ref = new DepthMap(512, 424, o.getXYZ());
+        for (int j = 0; j < 424 * 512 * 3; j++) {
+            //If the player index is between 0 and 5 there is a human
+            //Add XYZ point then
+            x = -o.getXYZ()[j];
+            if (x != Float.NEGATIVE_INFINITY && x != Float.POSITIVE_INFINITY) {
+                xmax = Math.max(x, xmax);
+                xmin = Math.min(x, xmin);
+            }
+            j++;
+            y = o.getXYZ()[j];
+            if (y != Float.NEGATIVE_INFINITY && y != Float.POSITIVE_INFINITY) {
+                ymax = Math.max(y, ymax);
+                ymin = Math.min(y, ymin);
+            }
+            j++;
+            z = o.getXYZ()[j];
+            if (z != Float.NEGATIVE_INFINITY && z != Float.POSITIVE_INFINITY) {
+                zmax = Math.max(z, zmax);
+                zmin = Math.min(z, zmin);
+            }
+        }
+        System.out.println(xmin);
+        System.out.println(xmax);
+        System.out.println(ymin);
+        System.out.println(ymax);
+        System.out.println(zmin);
+        System.out.println(zmax);
+    }
+
+    @Test
+    public void visualizeEverything() {
+        //Set up mqtt client for kinect
+        KinectClient kinectClient = new KinectClient();
+        kinectClient.setBroker("tcp://localhost:1883");
+        kinectClient.setClientId("asdf");
+        kinectClient.setDepthTopic("asdf");
+
+        //Set the frame handler
+        KinectHandler handler = new KinectHandler();
+        kinectClient.setFrameHandler(handler);
+        try {
+            //Connect to kinect
+            kinectClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
+        /*
+        Initialize the RobotClient
+         */
+//        RobotClient robotClient = new RobotClient();
+        Robot robot = new Robot();
+        RobotModel robotModel;
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\sample_robot.x3d"));
+        handler.setRobot(robot);
+
+        /*
+         * Initialize the evaluator
+         */
+        System.out.println("GUTEN TAG");
+        Evaluation evaluation = new Evaluation();
+        evaluation.setRobot(robot);
+        handler.setEvaluation(evaluation);
+        while (true) {
         }
     }
 }

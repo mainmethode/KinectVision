@@ -18,20 +18,23 @@ public class CameraCalibration {
      * @param depthData    Depth frame data
      * @return A list containing all found and 3D-matched markers.
      */
-    //TODO: getXYZ should be taken from DepthMap!!!!!!!!!!
     public static ArrayList<Marker3d> generate3dMarkers(short[] infraredData, DepthModel depthData) {
         //Detect markers in the infrared image
         ArrayList<FiducialDetectionResult> detectionResult = FiducialFinder.findFiducialsFromBytes(infraredData);
-        log.debug("Found " + detectionResult.size() + " markers.");
+//        log.debug("Found " + detectionResult.size() + " markers.");
         ArrayList<Marker3d> res = new ArrayList<>();
-        int x, y;
+        int x_rw, y_rw;
+        float x, y, z;
         //For every marker found generate a 3D marker
         for (FiducialDetectionResult fiducialDetectionResult : detectionResult) {
-            x = (int) Math.floor(fiducialDetectionResult.getCenter().x);
-            y = (int) Math.floor(fiducialDetectionResult.getCenter().y);
+            x_rw = (int) Math.floor(fiducialDetectionResult.getCenter().x);
+            y_rw = (int) Math.floor(fiducialDetectionResult.getCenter().y);
+            int j = y_rw * 512 + x_rw;
+            x = -depthData.getXYZ()[j * 3];
+            y = depthData.getXYZ()[j * 3 + 1];
+            z = depthData.getXYZ()[j * 3 + 2];
             //The marker takes the depth from the depth image as Z-coordinate
-            //TODO: getXYZ should be taken from DepthMap!!!!!!!!!!
-            Marker3d marker3d = new Marker3d(x, y, depthData.getXYZ()[y * 512 + x], fiducialDetectionResult.getId());
+            Marker3d marker3d = new Marker3d(x, y, z, fiducialDetectionResult.getId());
             res.add(marker3d);
         }
         return res;

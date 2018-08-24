@@ -48,7 +48,7 @@ public class RobotTest {
         /*
         Initialize markers
          */
-        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
+//        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
         ArrayList<Marker3d> markers = new ArrayList<>();
         Marker3d marker1 = new Marker3d(1d, 1d, 0d, 1);
         markers.add(marker1);
@@ -183,7 +183,7 @@ public class RobotTest {
         //Initialize the robot
         Robot robot = new Robot();
 //        robot.generateSampleRobotModel();
-        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
+//        robot.generateFromFiles("C:\\Users\\Justin\\Desktop\\");
         /*
         Initialize markers
          */

@@ -1,8 +1,13 @@
 package TestTools;
 
 
+import boofcv.abst.denoise.FactoryImageDenoise;
+import boofcv.abst.denoise.WaveletDenoiseFilter;
+import boofcv.gui.ListDisplayPanel;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.GrayF32;
 import de.rwth.i5.kinectvision.machinevision.FiducialDetectionResult;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
@@ -29,6 +34,7 @@ public class KinectVisualizationClient {
     private DepthModel depth;
     ImagePanel p;
     BufferedImage buf = new BufferedImage(512, 424, ColorModel.OPAQUE);
+    ListDisplayPanel panel = new ListDisplayPanel();
     private int pty = 20;
     private int ptx = 20;
 
@@ -62,8 +68,8 @@ public class KinectVisualizationClient {
                 /*
                  * Set if the vis should be shown.
                  */
-                buf = maskPlayer(o);
-                p.setBufferedImage(buf);
+//                buf = maskPlayer(o);
+//                p.setBufferedImage(buf);
 
             }
 
@@ -71,9 +77,9 @@ public class KinectVisualizationClient {
             public void OnInfraredFrame(short[] data) {
                 //Infrared frame: Visualize and find markers
                 infra = data;
-                //GrayF32 img = FiducialFinder.toGrayF32Image(data, 512, 424);
+//                GrayS16 img = FiducialFinder.toGrayS16Image(data, 512, 424);
                 // For visualisation
-                BufferedImage buf = new BufferedImage(512, 424, BufferedImage.TYPE_4BYTE_ABGR);
+                BufferedImage buf = new BufferedImage(512, 424, BufferedImage.TYPE_INT_BGR);
                 int idx = 0;
                 int iv = 0;
                 short sv = 0;
@@ -84,10 +90,48 @@ public class KinectVisualizationClient {
                     iv = sv >= 0 ? sv : 0x10000 + sv;
                     bv = (byte) ((iv & 0xfff8) >> 6);
                     abgr = bv + (bv << 8) + (bv << 16);
-                    buf.setRGB(i % 512, (int) (i / 512), abgr);
+                    buf.setRGB(i % 512, (i / 512), abgr);
                 }
+                // How many levels in wavelet transform
+                int numLevels = 1;
+                // Create the noise removal algorithm
+                WaveletDenoiseFilter<GrayF32> denoiser =
+                        FactoryImageDenoise.waveletBayes(GrayF32.class, numLevels, 0, 255);
 
-                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
+                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
+                GrayF32 denoised = new GrayF32(buf.getWidth(), buf.getHeight());
+                ConvertBufferedImage.convertFrom(buf, gray);
+                // remove noise from the image
+                denoiser.process(gray, denoised);
+
+
+//                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
+//                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
+                ConvertBufferedImage.convertFrom(buf, gray);
+                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(denoised);
+
+
+
+/*
+                int histogram[] = new int[256];
+                int transform[] = new int[256];
+
+                ListDisplayPanel panel = new ListDisplayPanel();
+                ImageStatistics.histogram(gray,0, histogram);
+                EnhanceImageOps.equalize(histogram, transform);
+                EnhanceImageOps.applyTransform(gray, transform, adjusted);
+                panel.addImage(ConvertBufferedImage.convertTo(adjusted, null), "Global");
+
+                EnhanceImageOps.equalizeLocal(gray, 50, adjusted, histogram, transform);
+                panel.addImage(ConvertBufferedImage.convertTo(adjusted,null),"Local");
+
+                panel.addImage(ConvertBufferedImage.convertTo(gray, null), "Original");
+
+                panel.setPreferredSize(new Dimension(gray.width, gray.height));
+                mainPanel.addItem(panel, "Histogram");
+
+*/
+                ConvertBufferedImage.convertTo(denoised, buf);
                 Graphics2D g = buf.createGraphics();
                 g.setStroke(new BasicStroke(2));
                 g.setColor(Color.GREEN);
@@ -105,11 +149,15 @@ public class KinectVisualizationClient {
                         bound2 = fiducialDetectionResult.getBounds().get(0);
                         g.drawLine(((int) bound1.x), (int) bound1.y, (int) bound2.x, (int) bound2.y);
                     }
+                    //Draw center
+                    g.fillRect(((int) (fiducialDetectionResult.getCenter().x - 10)), ((int) fiducialDetectionResult.getCenter().y - 10), 20, 20);
                 }
                 /*
                 Set if vis should be shown
                  */
-//                p.setBufferedImage(buf);
+
+//                panel.
+                p.setBufferedImage(buf);
             }
 
             @Override

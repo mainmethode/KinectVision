@@ -30,14 +30,17 @@ public class FiducialFinder {
         ArrayList<FiducialDetectionResult> detectionList = new ArrayList<>();
         // Detect the fiducials
         FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(
-                new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 21), GrayF32.class);
+                new ConfigFiducialBinary(0.5), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 25), GrayF32.class);
         detector.detect(original);
 
 //        log.info(detector.totalFound() + " fiducials found.");
         //Iterate over all fiducials found
-        Point2D_F64 locationPixel = new Point2D_F64();
-        Polygon2D_F64 bounds = new Polygon2D_F64();
+
+
+        System.out.println(detector.totalFound() + " FOUND");
         for (int i = 0; i < detector.totalFound(); i++) {
+            Polygon2D_F64 bounds = new Polygon2D_F64();
+            Point2D_F64 locationPixel = new Point2D_F64();
             detector.getCenter(i, locationPixel);
             detector.getBounds(i, bounds);
             FiducialDetectionResult fiducialDetectionResult = new FiducialDetectionResult(locationPixel, bounds, detector.getId(i));
@@ -87,8 +90,16 @@ public class FiducialFinder {
      */
     public static GrayF32 toGrayF32Image(short[] data, int w, int h) {
         GrayF32 res = new GrayF32(w, h);
+
+        int iv;
+        short sv;
+        byte bv;
         for (int i = 0; i < w * h; i++) {
-            res.set(i % w, (int) (i / w), data[i] * 2);
+            sv = data[i];
+            iv = sv >= 0 ? sv : 0x10000 + sv;
+            bv = (byte) ((iv & 0xfff8) >> 6);
+
+            res.set(i % w, i / w, data[i] * 2);
         }
 
 

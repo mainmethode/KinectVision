@@ -32,13 +32,15 @@ public class KinectHandler implements FrameHandler {
         //Update the last received depth frame
         lastDepth = o;
         //Stop here if no calibration has been made yet TODO:
-        if (!calibrated) {
-            return;
-        }
+//        if (!calibrated) {
+//            return;
+//        }
         //Given the point cloud detect the humans in there
         ArrayList<Vector3d> humanPoints = MachineVision.detectHumans(o);
         // Evaluator handles accordingly to determine if an action is needed.
-        evaluation.evaluate(humanPoints);
+        if (evaluation != null) {
+            evaluation.evaluate(humanPoints);
+        }
     }
 
     /**
@@ -47,9 +49,9 @@ public class KinectHandler implements FrameHandler {
      * @param data The infrared frame
      */
     @Override
-
     public void OnInfraredFrame(short[] data) {
         // Get the marker positions
+        if (lastDepth == null) return;
         ArrayList<Marker3d> markers = CameraCalibration.generate3dMarkers(data, lastDepth);
         try {
             robot.setRealWorldBasePositions(markers);
