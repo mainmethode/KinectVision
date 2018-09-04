@@ -2,13 +2,15 @@ package de.rwth.i5.kinectvision.visualization;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
-import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
 
 import javax.vecmath.Vector3d;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.ArrayList;
@@ -19,11 +21,44 @@ public class Visualizer {
     Graphics2D g = buf.createGraphics();
     PolygonMesh polygonMesh;
 
+    int scale = 100;
+    int tx = 600;
 
     public Visualizer() {
         g.setColor(Color.BLUE);
         g.setStroke(new BasicStroke(2));
+        panel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    scale += 10;
+                    tx += (300 - e.getX()) / 5;
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    scale -= 10;
+                    tx += (300 - e.getX()) / 5;
+                }
+            }
 
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
     }
 
     public void visualizeHumans(ArrayList<Vector3d> humans, Robot robot) {
@@ -44,28 +79,41 @@ public class Visualizer {
         g.setColor(Color.YELLOW);
         polygonMesh = robot.getCurrentRealWorldModel();
         if (polygonMesh != null) {
-            for (Face face : robot.getCurrentRealWorldModel()) {
+            for (Triangle face : robot.getCurrentRealWorldModel()) {
                 g.drawLine(convertValue(face.a.x), convertValue(face.a.z), convertValue(face.b.x), convertValue(face.b.z));
                 g.drawLine(convertValue(face.b.x), convertValue(face.b.z), convertValue(face.c.x), convertValue(face.c.z));
-                g.drawLine(convertValue(face.c.x), convertValue(face.c.z), convertValue(face.d.x), convertValue(face.d.z));
-                g.drawLine(convertValue(face.a.x), convertValue(face.a.z), convertValue(face.d.x), convertValue(face.d.z));
+                g.drawLine(convertValue(face.c.x), convertValue(face.c.z), convertValue(face.a.x), convertValue(face.a.z));
+//                g.drawLine(convertValue(face.a.x), convertValue(face.a.z), convertValue(face.d.x), convertValue(face.d.z));
             }
         }
 
         //Show marker positions
         g.setColor(Color.BLUE);
         for (Marker3d marker3d : robot.getBases()) {
-            System.out.println(marker3d.getPosition());
             if (Math.abs(marker3d.getPosition().x) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().y) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().z) != Double.POSITIVE_INFINITY) {
-                g.fillRect(convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, 4, 4);
+                g.fillRect(convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, 40, 40);
 //                g.drawImage(cross, convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, null);
+            }
+        }
+        g.setColor(Color.GREEN);
+        if (polygonMesh != null) {
+            if (polygonMesh.getMarker1() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker1().x) - 2, convertValue(polygonMesh.getMarker1().z) - 2, 14, 14);
+            }
+            g.setColor(Color.MAGENTA);
+            if (polygonMesh.getMarker2() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker2().x) - 2, convertValue(polygonMesh.getMarker2().z) - 2, 14, 14);
+            }
+            g.setColor(Color.WHITE);
+            if (polygonMesh.getMarker3() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
             }
         }
         panel.setBufferedImage(buf);
     }
 
     private int convertValue(double value) {
-        return (int) ((value + 10) * 100) - 600;
+        return (int) ((value + 10) * scale) - tx;
     }
 
 }

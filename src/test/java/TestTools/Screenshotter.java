@@ -1,7 +1,11 @@
 package TestTools;
 
+import boofcv.abst.denoise.FactoryImageDenoise;
+import boofcv.abst.denoise.WaveletDenoiseFilter;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.GrayF32;
 import de.rwth.i5.kinectvision.machinevision.FiducialDetectionResult;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
@@ -74,15 +78,12 @@ public class Screenshotter {
             }
 
             @Override
-            /**
-             * Infrared frame: Visualize and find markers
-             */
             public void OnInfraredFrame(short[] data) {
-
+                //Infrared frame: Visualize and find markers
                 infra = data;
-
-                buf = new BufferedImage(512, 424, BufferedImage.TYPE_4BYTE_ABGR);
-                //Convert values of the infrared frame to color values
+//                GrayS16 img = FiducialFinder.toGrayS16Image(data, 512, 424);
+                // For visualisation
+                BufferedImage buf = new BufferedImage(512, 424, BufferedImage.TYPE_INT_BGR);
                 int idx = 0;
                 int iv = 0;
                 short sv = 0;
@@ -95,9 +96,26 @@ public class Screenshotter {
                     abgr = bv + (bv << 8) + (bv << 16);
                     buf.setRGB(i % 512, (i / 512), abgr);
                 }
+                // How many levels in wavelet transform
+                int numLevels = 1;
+                // Create the noise removal algorithm
+                WaveletDenoiseFilter<GrayF32> denoiser =
+                        FactoryImageDenoise.waveletBayes(GrayF32.class, numLevels, 0, 255);
 
-                //Detect fiducials and show bounds if found
-                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
+                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
+                GrayF32 denoised = new GrayF32(buf.getWidth(), buf.getHeight());
+                ConvertBufferedImage.convertFrom(buf, gray);
+                // remove noise from the image
+                denoiser.process(gray, denoised);
+
+
+//                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
+//                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
+                ConvertBufferedImage.convertFrom(buf, gray);
+                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(denoised);
+
+
+                ConvertBufferedImage.convertTo(denoised, buf);
                 Graphics2D g = buf.createGraphics();
                 g.setStroke(new BasicStroke(2));
                 g.setColor(Color.GREEN);
@@ -115,10 +133,14 @@ public class Screenshotter {
                         bound2 = fiducialDetectionResult.getBounds().get(0);
                         g.drawLine(((int) bound1.x), (int) bound1.y, (int) bound2.x, (int) bound2.y);
                     }
+                    //Draw center
+                    g.fillRect(((int) (fiducialDetectionResult.getCenter().x - 10)), ((int) fiducialDetectionResult.getCenter().y - 10), 20, 20);
                 }
                 /*
                 Set if vis should be shown
                  */
+
+//                panel.
                 p.setBufferedImage(buf);
             }
 
@@ -139,11 +161,11 @@ public class Screenshotter {
 
     private static void saveDataClicked() {
         if (infra.length > 0) {
-            KinectDataStore.saveInfraredData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\" + System.currentTimeMillis() + "ms_infra.bin", infra);
+            KinectDataStore.saveInfraredData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\2 Marker " + System.currentTimeMillis() + "ms_infra.bin", infra);
             infra = new short[0];
         }
         if (depth != null) {
-            KinectDataStore.saveDepthData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\" + System.currentTimeMillis() + "ms_depth.bin", depth);
+            KinectDataStore.saveDepthData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\2 Marker " + System.currentTimeMillis() + "ms_depth.bin", depth);
             depth = null;
         }
     }

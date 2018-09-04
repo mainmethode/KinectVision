@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
@@ -59,6 +61,12 @@ public class KinectClient implements FrameSource {
             e.printStackTrace();
         }
         return outputStream.toByteArray();
+    }
+
+    public static short[] byteToShortArray(byte[] bytes) {
+        short[] res = new short[bytes.length / 2];
+        ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(res);
+        return res;
     }
 
     /**
@@ -115,7 +123,7 @@ public class KinectClient implements FrameSource {
                         break;
                     case "infrared":
                         //Infrared stuff here
-                        frameHandler.OnInfraredFrame((short[]) conf.asObject(payload));
+                        frameHandler.OnInfraredFrame(byteToShortArray(payload));
                         break;
                     case "color":
                         frameHandler.onColorFrame(payload);

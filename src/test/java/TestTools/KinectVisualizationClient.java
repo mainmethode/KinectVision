@@ -37,6 +37,7 @@ public class KinectVisualizationClient {
     ListDisplayPanel panel = new ListDisplayPanel();
     private int pty = 20;
     private int ptx = 20;
+    int scaleFac = 1;
 
     public KinectVisualizationClient(KinectClient client) {
         //Generates a window for showing the output
@@ -48,6 +49,7 @@ public class KinectVisualizationClient {
                 saveDataClicked();
             }
         });
+
 
         client.setFrameHandler(new FrameHandler() {
             @Override
@@ -92,6 +94,7 @@ public class KinectVisualizationClient {
                     abgr = bv + (bv << 8) + (bv << 16);
                     buf.setRGB(i % 512, (i / 512), abgr);
                 }
+
                 // How many levels in wavelet transform
                 int numLevels = 1;
                 // Create the noise removal algorithm
@@ -108,29 +111,13 @@ public class KinectVisualizationClient {
 //                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
 //                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
                 ConvertBufferedImage.convertFrom(buf, gray);
-                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(denoised);
+                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(gray);
 
 
 
-/*
-                int histogram[] = new int[256];
-                int transform[] = new int[256];
 
-                ListDisplayPanel panel = new ListDisplayPanel();
-                ImageStatistics.histogram(gray,0, histogram);
-                EnhanceImageOps.equalize(histogram, transform);
-                EnhanceImageOps.applyTransform(gray, transform, adjusted);
-                panel.addImage(ConvertBufferedImage.convertTo(adjusted, null), "Global");
 
-                EnhanceImageOps.equalizeLocal(gray, 50, adjusted, histogram, transform);
-                panel.addImage(ConvertBufferedImage.convertTo(adjusted,null),"Local");
 
-                panel.addImage(ConvertBufferedImage.convertTo(gray, null), "Original");
-
-                panel.setPreferredSize(new Dimension(gray.width, gray.height));
-                mainPanel.addItem(panel, "Histogram");
-
-*/
                 ConvertBufferedImage.convertTo(denoised, buf);
                 Graphics2D g = buf.createGraphics();
                 g.setStroke(new BasicStroke(2));
@@ -152,6 +139,8 @@ public class KinectVisualizationClient {
                     //Draw center
                     g.fillRect(((int) (fiducialDetectionResult.getCenter().x - 10)), ((int) fiducialDetectionResult.getCenter().y - 10), 20, 20);
                 }
+
+//                System.out.println(det.size());
                 /*
                 Set if vis should be shown
                  */

@@ -3,6 +3,7 @@ package de.rwth.i5.kinectvision.robot;
 import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 
 /**
  * Class for parsing a file containing the 3d bounding box model for the robot
+ *
+ * VERY IMPORTANT NOTICE: CHOOSE Y FORWARD, Z UP IN BLENDER!!!
  */
 @Slf4j
 public class ModelFileParser {
@@ -162,9 +165,9 @@ public class ModelFileParser {
             return null;
         }
 
-        Node indexSet = findItem("IndexedFaceSet", shape.getChildNodes());
+        Node indexSet = findItem("IndexedTriangleSet", shape.getChildNodes());
         if (indexSet == null) {
-            log.error("No IndexFaceSet found in file.");
+            log.error("No IndexedTriangleSet found in file.");
             return null;
         }
 
@@ -174,7 +177,7 @@ public class ModelFileParser {
             return null;
         }
         //Get the coordinate indices for the faces
-        String coordIndex = indexSet.getAttributes().getNamedItem("coordIndex").getNodeValue();
+        String coordIndex = indexSet.getAttributes().getNamedItem("index").getNodeValue();
         List<Integer> coordinateIndexes = Arrays.stream(coordIndex.split(" "))
                 .map(Integer::parseInt).filter(integer -> integer != -1).collect(Collectors.toList());
         //Get the coordinates
@@ -185,7 +188,8 @@ public class ModelFileParser {
         //Create vectors
         List<Vector3d> vector3ds = generateVectors(coordinates);
         //Create faces
-        ArrayList<Face> faces = generateFaces(vector3ds, coordinateIndexes);
+//        ArrayList<Triangle> faces = generateFaces(vector3ds, coordinateIndexes);
+        ArrayList<Triangle> faces = generateTriangles(vector3ds, coordinateIndexes);
 
         RobotPart arm = new RobotPart();
         PolygonMesh box = new PolygonMesh();
@@ -204,6 +208,19 @@ public class ModelFileParser {
             }
         }
         return null;
+    }
+
+    private static ArrayList<Triangle> generateTriangles(List<Vector3d> points, List<Integer> indices) {
+        if (indices.size() % 3 != 0) {
+            log.error("Size of list for face generation wrong");
+            return null;
+        }
+        ArrayList<Triangle> res = new ArrayList<>();
+        for (int i = 0; i < indices.size(); i += 4) {
+            Triangle face = new Triangle(new Vector3d(points.get(indices.get(i))), new Vector3d(points.get(indices.get(i + 1))), new Vector3d(points.get(indices.get(i + 2))));
+            res.add(face);
+        }
+        return res;
     }
 
     private static ArrayList<Face> generateFaces(List<Vector3d> points, List<Integer> indices) {

@@ -19,7 +19,7 @@ public class MachineVision {
             //If the player index is between 0 and 5 there is a human
             if (o.getPlayerIndex()[j] >= 0 && o.getPlayerIndex()[j] <= 5) {
                 //Add XYZ point then
-                x = -o.getXYZ()[j * 3];
+                x = o.getXYZ()[j * 3];
                 y = o.getXYZ()[j * 3 + 1];
                 z = o.getXYZ()[j * 3 + 2];
                 res.add(new Vector3d(x, y, z));

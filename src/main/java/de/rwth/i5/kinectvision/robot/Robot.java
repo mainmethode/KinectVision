@@ -1,6 +1,5 @@
 package de.rwth.i5.kinectvision.robot;
 
-import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
@@ -23,6 +22,8 @@ import java.util.List;
 public class Robot {
     private RobotModel robotModel;
     private double[] angles = new double[3];
+    @Getter
+    private boolean initialized = false;
     @Getter
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
@@ -201,54 +202,76 @@ public class Robot {
         Transformation
          */
         //Get the base points
-        if (bases.size() < 2) {
+        if (bases.size() < 3) {
             log.error("Not enough (" + bases.size() + ") marker positions set for the robot. At least 3 needed!");
             return null;
         }
-        Marker3d base1, base2, base3;
-        base1 = bases.get(0);
-        base2 = bases.get(1);
-//        base3 = bases.get(2);
+        /*
+         * The first three recognized markers
+         */
+        Marker3d marker1, marker2, marker3;
+        marker1 = bases.get(0);
+        marker2 = bases.get(1);
+        marker3 = bases.get(2);
+
+        /*
+         * The matching markers according to IDs
+         */
+        Marker3d base1 = null, base2 = null, base3 = null;
+        for (Marker3d marker3d : robotModel.getBasePoints()) {
+            if (marker3d.getId() == marker1.getId()) {
+                base1 = marker3d;
+            } else if (marker3d.getId() == marker2.getId()) {
+                base2 = marker3d;
+            } else if (marker3d.getId() == marker3.getId()) {
+                base3 = marker3d;
+            }
+        }
+        if (base1 == null || base2 == null || base3 == null) {
+            log.error("No matching base found");
+            return null;
+        }
         /*
         Create transformation matrix
          */
         //Translation to move base point 1 in the robot model to M1
-        Matrix4d translationMatrix = generateTranslationMatrix();
+//        Matrix4d translationMatrix = generateTranslationMatrix();
+        Matrix4d translationMatrix = generateTranslationMatrix(base1.getPosition(), marker1.getPosition());
 
         //Rotation to fit to M2, rot about Z
         Matrix4d rotationMatrix = new Matrix4d();
 
         //Determine the angle!
-        Vector3d m1m2 = new Vector3d(base2.getPosition().x - base1.getPosition().x, base2.getPosition().y - base1.getPosition().y, 0);
+        Vector3d m1m2 = new Vector3d(marker2.getPosition().x - marker1.getPosition().x, marker2.getPosition().y - marker1.getPosition().y, 0);
         Vector3d m1R2 = new Vector3d();
 
-        m1R2.sub(robotModel.getBasePoints().get(1).getPosition(), robotModel.getBasePoints().get(0).getPosition());
+        m1R2.sub(base2.getPosition(), base1.getPosition());
         double radianAngle = m1R2.angle(m1m2);
 //        radianAngle = Math.toRadians(-Math.toDegrees(radianAngle));
         rotationMatrix.setIdentity();
         rotationMatrix.m00 = Math.cos(radianAngle);
         rotationMatrix.m01 = -Math.sin(radianAngle);
-        rotationMatrix.m03 = base1.getPosition().x * (1 - Math.cos(radianAngle)) + base1.getPosition().y * (Math.sin(radianAngle));
+        rotationMatrix.m03 = marker1.getPosition().x * (1 - Math.cos(radianAngle)) + marker1.getPosition().y * (Math.sin(radianAngle));
 
         rotationMatrix.m10 = Math.sin(radianAngle);
         rotationMatrix.m11 = Math.cos(radianAngle);
-        rotationMatrix.m13 = base1.getPosition().y * (1 - Math.cos(radianAngle)) - base1.getPosition().x * (Math.sin(radianAngle));
+        rotationMatrix.m13 = marker1.getPosition().y * (1 - Math.cos(radianAngle)) - marker1.getPosition().x * (Math.sin(radianAngle));
 
         //Rotation to fit to M2, Rotate about the normal vector of the spanned triangle
         double radianAngle2;
-        Vector3d transformedM2 = new Vector3d(robotModel.getBasePoints().get(1).getPosition());
+        Vector3d transformedM2 = new Vector3d(base2.getPosition());
         Triangle.transformVector(translationMatrix, transformedM2);
         Triangle.transformVector(rotationMatrix, transformedM2);
 
         Vector3d r1r2 = new Vector3d();
-        r1r2.sub(base2.getPosition(), base1.getPosition());
+        r1r2.sub(marker2.getPosition(), marker1.getPosition());
         //The normal vector, we will rotate around it
         Vector3d crossProduct = new Vector3d();
         crossProduct.cross(transformedM2, r1r2);
         crossProduct.normalize();
 
         Vector3d r1tm2 = new Vector3d();
-        r1tm2.sub(transformedM2, base1.getPosition());
+        r1tm2.sub(transformedM2, marker1.getPosition());
         radianAngle2 = r1r2.angle(r1tm2);
         Matrix4d rotationMatrix2 = rotationMatrixArbitraryAxis(radianAngle2, crossProduct);
 
@@ -257,20 +280,19 @@ public class Robot {
          */
         //Calculate scale factor
         Vector3d distm1m2real = new Vector3d();
-        distm1m2real.sub(base1.getPosition(), base2.getPosition());
-
+        distm1m2real.sub(marker1.getPosition(), marker2.getPosition());
         Vector3d distm1m2model = new Vector3d();
-        distm1m2model.sub(robotModel.getBasePoints().get(0).getPosition(), robotModel.getBasePoints().get(1).getPosition());
+        distm1m2model.sub(base1.getPosition(), base2.getPosition());
 
         //Calculate the scale factor
         double scaleFactor = distm1m2real.length() / distm1m2model.length();
         //Generate the scale matrix
-        Matrix4d scaleMatrix = getScaleMatrix(base1.getPosition(), scaleFactor);
+        Matrix4d scaleMatrix = getScaleMatrix(marker1.getPosition(), scaleFactor);
 
 
-        Matrix4d translationMatrixRotation2 = generateTranslationMatrix(base1.getPosition(), new Vector3d());
-        Matrix4d translationMatrixRotation2Negated = generateTranslationMatrix(new Vector3d(), base1.getPosition());
-        Vector3d tm3 = new Vector3d(robotModel.getBasePoints().get(2).getPosition());
+        Matrix4d translationMatrixRotation2 = generateTranslationMatrix(marker1.getPosition(), new Vector3d());
+        Matrix4d translationMatrixRotation2Negated = generateTranslationMatrix(new Vector3d(), marker1.getPosition());
+        Vector3d tm3 = new Vector3d(base3.getPosition());
         Triangle.transformVector(translationMatrix, tm3);
         Triangle.transformVector(rotationMatrix, tm3);
         Triangle.transformVector(translationMatrixRotation2, tm3);
@@ -278,19 +300,19 @@ public class Robot {
         Triangle.transformVector(translationMatrixRotation2Negated, tm3);
 
         Vector3d r1tm3 = new Vector3d();
-        r1tm3.sub(tm3, base1.getPosition());
-       /*
+        r1tm3.sub(tm3, marker1.getPosition());
+
         Vector3d r1r3 = new Vector3d();
-        r1r3.sub(base3.getPosition(), base1.getPosition());
+        r1r3.sub(marker3.getPosition(), marker1.getPosition());
         double radianAngle3 = getAnglePlanes(r1r2, r1r3, r1r2, r1tm3);
         Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis(radianAngle3, r1r2);
-*/
+
         //Create the transformation matrix by multiplying all matrices in reverse order
         Matrix4d transformationMatrix = new Matrix4d();
         transformationMatrix.setIdentity();
-        transformationMatrix.mul(translationMatrixRotation2Negated);
+//        transformationMatrix.mul(translationMatrixRotation2Negated);
 //        transformationMatrix.mul(rotationMatrix3);
-        transformationMatrix.mul(translationMatrixRotation2);
+//        transformationMatrix.mul(translationMatrixRotation2);
         transformationMatrix.mul(scaleMatrix);
         transformationMatrix.mul(translationMatrixRotation2Negated);
         transformationMatrix.mul(rotationMatrix2);
@@ -298,12 +320,18 @@ public class Robot {
         transformationMatrix.mul(rotationMatrix);
         transformationMatrix.mul(translationMatrix);
 
-        for (Face re : res) {
+        for (Triangle re : res) {
             re.applyTransformation(transformationMatrix);
         }
-
+        res.setMarker1(new Vector3d(base1.getPosition().x, base1.getPosition().y, base1.getPosition().z));
+        res.setMarker2(new Vector3d(base2.getPosition().x, base2.getPosition().y, base2.getPosition().z));
+        res.setMarker3(new Vector3d(base3.getPosition().x, base3.getPosition().y, base3.getPosition().z));
+        Triangle.transformVector(transformationMatrix, res.getMarker1());
+        Triangle.transformVector(transformationMatrix, res.getMarker2());
+        Triangle.transformVector(transformationMatrix, res.getMarker3());
         return res;
     }
+
 
     /**
      * Generates the robot from files

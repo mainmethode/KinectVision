@@ -37,13 +37,14 @@ public class FiducialFinder {
         //Iterate over all fiducials found
 
 
-        System.out.println(detector.totalFound() + " FOUND");
+//        System.out.println(detector.totalFound() + " FOUND");
         for (int i = 0; i < detector.totalFound(); i++) {
             Polygon2D_F64 bounds = new Polygon2D_F64();
             Point2D_F64 locationPixel = new Point2D_F64();
             detector.getCenter(i, locationPixel);
             detector.getBounds(i, bounds);
             FiducialDetectionResult fiducialDetectionResult = new FiducialDetectionResult(locationPixel, bounds, detector.getId(i));
+//            System.out.println("ID:" + detector.getId(i));
             detectionList.add(fiducialDetectionResult);
 //            if (detector.hasUniqueID())
 //                System.out.println("Target ID = " + detector.getId(i));

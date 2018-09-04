@@ -29,8 +29,8 @@ public class CameraCalibration {
         for (FiducialDetectionResult fiducialDetectionResult : detectionResult) {
             x_rw = (int) Math.floor(fiducialDetectionResult.getCenter().x);
             y_rw = (int) Math.floor(fiducialDetectionResult.getCenter().y);
-            int j = y_rw * 512 + x_rw;
-            x = -depthData.getXYZ()[j * 3];
+            int j = y_rw * 512 + 511 - x_rw;
+            x = depthData.getXYZ()[j * 3];
             y = depthData.getXYZ()[j * 3 + 1];
             z = depthData.getXYZ()[j * 3 + 2];
             //The marker takes the depth from the depth image as Z-coordinate

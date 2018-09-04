@@ -4,8 +4,8 @@ import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.analysis.Evaluation;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
-import de.rwth.i5.kinectvision.machinevision.model.Face;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.robot.Robot;
@@ -173,11 +173,11 @@ public class Playground {
                 w.write(point3d.x + " " + point3d.y + " " + point3d.z + " 10 10 10\n");
             }
 
-            for (Face triangle : roboModel) {
+            for (Triangle triangle : roboModel) {
                 w.write(triangle.a.x + " " + triangle.a.y + " " + triangle.a.z + " 255 0 0\n");
                 w.write(triangle.b.x + " " + triangle.b.y + " " + triangle.b.z + " 255 0 0\n");
                 w.write(triangle.c.x + " " + triangle.c.y + " " + triangle.c.z + " 255 0 0\n");
-                w.write(triangle.d.x + " " + triangle.d.y + " " + triangle.d.z + " 255 0 0\n");
+//                w.write(triangle.d.x + " " + triangle.d.y + " " + triangle.d.z + " 255 0 0\n");
             }
 
 
@@ -236,22 +236,17 @@ public class Playground {
         //Set the frame handler
         KinectHandler handler = new KinectHandler();
         kinectClient.setFrameHandler(handler);
-        try {
-            //Connect to kinect
-            kinectClient.initialize();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+
 
         /*
         Initialize the RobotClient
          */
 //        RobotClient robotClient = new RobotClient();
+
         Robot robot = new Robot();
         RobotModel robotModel;
-        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\sample_robot.x3d"));
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\robo.x3d"));
         handler.setRobot(robot);
-
         /*
          * Initialize the evaluator
          */
@@ -259,6 +254,13 @@ public class Playground {
         Evaluation evaluation = new Evaluation();
         evaluation.setRobot(robot);
         handler.setEvaluation(evaluation);
+
+        try {
+            //Connect to kinect
+            kinectClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
         while (true) {
         }
     }
