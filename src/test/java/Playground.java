@@ -245,7 +245,7 @@ public class Playground {
 
         Robot robot = new Robot();
         RobotModel robotModel;
-        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\robo.x3d"));
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\robot_3.x3d"));
         handler.setRobot(robot);
         /*
          * Initialize the evaluator

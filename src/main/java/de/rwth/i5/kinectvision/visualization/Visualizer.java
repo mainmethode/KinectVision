@@ -20,13 +20,15 @@ public class Visualizer {
     ImagePanel panel = ShowImages.showWindow(buf, "Testvisualisierung");
     Graphics2D g = buf.createGraphics();
     PolygonMesh polygonMesh;
-
+    BasicStroke text = new BasicStroke(2);
+    BasicStroke normal = new BasicStroke(1);
+    int markerSize = 10;
     int scale = 100;
     int tx = 600;
 
     public Visualizer() {
         g.setColor(Color.BLUE);
-        g.setStroke(new BasicStroke(2));
+        g.setStroke(new BasicStroke(1));
         panel.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -62,9 +64,9 @@ public class Visualizer {
     }
 
     public void visualizeHumans(ArrayList<Vector3d> humans, Robot robot) {
+        g.setStroke(normal);
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
-        //TODO Testweise durch showImage anzeigen
         //Show human points from above
         g.setColor(Color.RED);
         for (Vector3d human : humans) {
@@ -91,24 +93,28 @@ public class Visualizer {
         g.setColor(Color.BLUE);
         for (Marker3d marker3d : robot.getBases()) {
             if (Math.abs(marker3d.getPosition().x) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().y) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().z) != Double.POSITIVE_INFINITY) {
-                g.fillRect(convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, 40, 40);
+                g.fillRect(convertValue(marker3d.getPosition().x) - markerSize / 2, convertValue(marker3d.getPosition().z) - markerSize / 2, markerSize, markerSize);
 //                g.drawImage(cross, convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, null);
             }
         }
-        g.setColor(Color.GREEN);
-        if (polygonMesh != null) {
-            if (polygonMesh.getMarker1() != null) {
-                g.fillRect(convertValue(polygonMesh.getMarker1().x) - 2, convertValue(polygonMesh.getMarker1().z) - 2, 14, 14);
-            }
-            g.setColor(Color.MAGENTA);
-            if (polygonMesh.getMarker2() != null) {
-                g.fillRect(convertValue(polygonMesh.getMarker2().x) - 2, convertValue(polygonMesh.getMarker2().z) - 2, 14, 14);
-            }
-            g.setColor(Color.WHITE);
-            if (polygonMesh.getMarker3() != null) {
-                g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
-            }
-        }
+//        g.setColor(Color.GREEN);
+//        if (polygonMesh != null) {
+//            if (polygonMesh.getMarker1() != null) {
+//                g.fillRect(convertValue(polygonMesh.getMarker1().x) - 2, convertValue(polygonMesh.getMarker1().z) - 2, 14, 14);
+//            }
+//            g.setColor(Color.MAGENTA);
+//            if (polygonMesh.getMarker2() != null) {
+//                g.fillRect(convertValue(polygonMesh.getMarker2().x) - 2, convertValue(polygonMesh.getMarker2().z) - 2, 14, 14);
+//            }
+//            g.setColor(Color.WHITE);
+//            if (polygonMesh.getMarker3() != null) {
+//                g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
+//            }
+//        }
+
+        g.setColor(Color.CYAN);
+        g.fillRect(convertValue(0) - 5, convertValue(0) - 5, 10, 10);
+        g.drawChars("KINECT".toCharArray(), 0, 6, convertValue(0) - 20, convertValue(0) - 20);
         panel.setBufferedImage(buf);
     }
 

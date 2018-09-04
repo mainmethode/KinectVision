@@ -305,14 +305,51 @@ public class Robot {
         Vector3d r1r3 = new Vector3d();
         r1r3.sub(marker3.getPosition(), marker1.getPosition());
         double radianAngle3 = getAnglePlanes(r1r2, r1r3, r1r2, r1tm3);
+
         Matrix4d rotationMatrix3 = rotationMatrixArbitraryAxis(radianAngle3, r1r2);
 
+        Vector3d transformedBase3 = new Vector3d(base3.getPosition());
+        Triangle.transformVector(translationMatrix, transformedBase3);
+        Triangle.transformVector(rotationMatrix, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(rotationMatrix2, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2Negated, transformedBase3);
+        Triangle.transformVector(scaleMatrix, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(rotationMatrix3, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+
+        //Save distance from transformed r3 to real r3
+        Vector3d distT3M3 = new Vector3d(transformedBase3);
+        distT3M3.sub(marker3.getPosition());
+        double distance = distT3M3.length();
+
+        Matrix4d comprotationMatrix3 = rotationMatrixArbitraryAxis(-radianAngle3, r1r2);
+
+        transformedBase3 = new Vector3d(base3.getPosition());
+        Triangle.transformVector(translationMatrix, transformedBase3);
+        Triangle.transformVector(rotationMatrix, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(rotationMatrix2, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2Negated, transformedBase3);
+        Triangle.transformVector(scaleMatrix, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(comprotationMatrix3, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+
+        distT3M3 = new Vector3d(transformedBase3);
+        distT3M3.sub(marker3.getPosition());
+        double distance2 = distT3M3.length();
+
+        if (distance2 < distance) {
+            rotationMatrix3 = comprotationMatrix3;
+        }
         //Create the transformation matrix by multiplying all matrices in reverse order
         Matrix4d transformationMatrix = new Matrix4d();
         transformationMatrix.setIdentity();
-//        transformationMatrix.mul(translationMatrixRotation2Negated);
-//        transformationMatrix.mul(rotationMatrix3);
-//        transformationMatrix.mul(translationMatrixRotation2);
+        transformationMatrix.mul(translationMatrixRotation2Negated);
+        transformationMatrix.mul(rotationMatrix3);
+        transformationMatrix.mul(translationMatrixRotation2);
         transformationMatrix.mul(scaleMatrix);
         transformationMatrix.mul(translationMatrixRotation2Negated);
         transformationMatrix.mul(rotationMatrix2);
