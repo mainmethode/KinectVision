@@ -97,20 +97,20 @@ public class Visualizer {
 //                g.drawImage(cross, convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, null);
             }
         }
-//        g.setColor(Color.GREEN);
-//        if (polygonMesh != null) {
-//            if (polygonMesh.getMarker1() != null) {
-//                g.fillRect(convertValue(polygonMesh.getMarker1().x) - 2, convertValue(polygonMesh.getMarker1().z) - 2, 14, 14);
-//            }
-//            g.setColor(Color.MAGENTA);
-//            if (polygonMesh.getMarker2() != null) {
-//                g.fillRect(convertValue(polygonMesh.getMarker2().x) - 2, convertValue(polygonMesh.getMarker2().z) - 2, 14, 14);
-//            }
-//            g.setColor(Color.WHITE);
-//            if (polygonMesh.getMarker3() != null) {
-//                g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
-//            }
-//        }
+        g.setColor(Color.GREEN);
+        if (polygonMesh != null) {
+            if (polygonMesh.getMarker1() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker1().x) - 2, convertValue(polygonMesh.getMarker1().z) - 2, 14, 14);
+            }
+            g.setColor(Color.MAGENTA);
+            if (polygonMesh.getMarker2() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker2().x) - 2, convertValue(polygonMesh.getMarker2().z) - 2, 14, 14);
+            }
+            g.setColor(Color.WHITE);
+            if (polygonMesh.getMarker3() != null) {
+                g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
+            }
+        }
 
         g.setColor(Color.CYAN);
         g.fillRect(convertValue(0) - 5, convertValue(0) - 5, 10, 10);

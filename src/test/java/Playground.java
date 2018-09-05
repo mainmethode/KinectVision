@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -225,6 +226,13 @@ public class Playground {
         System.out.println(zmax);
     }
 
+    public static double angle(Vector3d v1, Vector3d v2) {
+        double angle = v1.angle(v2);
+        if (v1.x * v2.y - v1.y * v2.x < 0)
+            angle = -angle;
+        return angle;
+    }
+
     @Test
     public void visualizeEverything() {
         //Set up mqtt client for kinect
@@ -263,5 +271,17 @@ public class Playground {
         }
         while (true) {
         }
+    }
+
+    //    @Test
+    public void vectorTest() {
+        Vector3d v1 = new Vector3d(1, 0, 0);
+        Vector3d v2 = new Vector3d(-1, 0, 0);
+        Vector3d v3 = new Vector3d(0, 1, 0);
+        Vector3d v4 = new Vector3d(0, -1, 0);
+
+        System.out.println(angle(v1, v3));
+        System.out.println(angle(v1, v4));
+
     }
 }

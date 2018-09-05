@@ -26,7 +26,7 @@ public class Robot {
     private boolean initialized = false;
     @Getter
     private ArrayList<Marker3d> bases = new ArrayList<>();
-
+    double ang = 0;
     /**
      * Sets the angle of the given axis
      *
@@ -182,6 +182,28 @@ public class Robot {
         return translationMatrix;
     }
 
+    public static double angle(Vector3d v1, Vector3d v2) {
+        double angle = v1.angle(v2);
+        if (v1.x * v2.y - v1.y * v2.x < 0)
+            angle = -angle;
+        return angle;
+    }
+
+
+    /**
+     * Generates the robot from files
+     *
+     * @param file The file
+     */
+    public void generateFromFiles(File file) {
+        log.info("Generate from file");
+        try {
+            this.robotModel = ModelFileParser.parseFile(file);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This method generates a real world 3d representation of the robot.
      * Here the loaded robot model, the current axis orientations and the base positions are respected.
@@ -246,7 +268,8 @@ public class Robot {
         Vector3d m1R2 = new Vector3d();
 
         m1R2.sub(base2.getPosition(), base1.getPosition());
-        double radianAngle = m1R2.angle(m1m2);
+//        double radianAngle = m1R2.angle(m1m2);
+        double radianAngle = angle(m1R2, m1m2);
 //        radianAngle = Math.toRadians(-Math.toDegrees(radianAngle));
         rotationMatrix.setIdentity();
         rotationMatrix.m00 = Math.cos(radianAngle);
@@ -317,12 +340,20 @@ public class Robot {
         Triangle.transformVector(scaleMatrix, transformedBase3);
         Triangle.transformVector(translationMatrixRotation2, transformedBase3);
         Triangle.transformVector(rotationMatrix3, transformedBase3);
-        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2Negated, transformedBase3);
+
+
+
+
+
+
+
 
         //Save distance from transformed r3 to real r3
         Vector3d distT3M3 = new Vector3d(transformedBase3);
         distT3M3.sub(marker3.getPosition());
         double distance = distT3M3.length();
+        System.out.println("D:" + distance);
 
         Matrix4d comprotationMatrix3 = rotationMatrixArbitraryAxis(-radianAngle3, r1r2);
 
@@ -335,12 +366,12 @@ public class Robot {
         Triangle.transformVector(scaleMatrix, transformedBase3);
         Triangle.transformVector(translationMatrixRotation2, transformedBase3);
         Triangle.transformVector(comprotationMatrix3, transformedBase3);
-        Triangle.transformVector(translationMatrixRotation2, transformedBase3);
+        Triangle.transformVector(translationMatrixRotation2Negated, transformedBase3);
 
         distT3M3 = new Vector3d(transformedBase3);
         distT3M3.sub(marker3.getPosition());
         double distance2 = distT3M3.length();
-
+        System.out.println("D2" + distance2);
         if (distance2 < distance) {
             rotationMatrix3 = comprotationMatrix3;
         }
@@ -368,20 +399,4 @@ public class Robot {
         Triangle.transformVector(transformationMatrix, res.getMarker3());
         return res;
     }
-
-
-    /**
-     * Generates the robot from files
-     *
-     * @param file The file
-     */
-    public void generateFromFiles(File file) {
-        log.info("Generate from file");
-        try {
-            this.robotModel = ModelFileParser.parseFile(file);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
-        }
-    }
-
 }
