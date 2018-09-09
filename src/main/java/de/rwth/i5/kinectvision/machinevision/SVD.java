@@ -19,9 +19,7 @@ public class SVD {
         for (RealVector vec : vecs) {
             res = res.add(vec);
         }
-        System.out.println(res);
         res = res.mapMultiply(1.0 / vecs.size());
-        System.out.println(res);
         return res;
     }
 
