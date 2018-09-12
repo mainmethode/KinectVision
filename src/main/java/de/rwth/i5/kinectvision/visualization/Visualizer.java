@@ -111,7 +111,12 @@ public class Visualizer {
                 g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
             }
         }
+        try {
+            System.out.println("DIST: " + robot.getBases().get(0).getPosition());
+            System.out.println("DIST2: " + robot.getBases().get(1).getPosition());
+        } catch (Exception e) {
 
+        }
         g.setColor(Color.CYAN);
         g.fillRect(convertValue(0) - 5, convertValue(0) - 5, 10, 10);
         g.drawChars("KINECT".toCharArray(), 0, 6, convertValue(0) - 20, convertValue(0) - 20);
