@@ -19,7 +19,7 @@ public class RobotModel {
     /**
      * Array containing the axis
      */
-    private Axis[] axes = new Axis[3];
+    private ArrayList<Axis> axes = new ArrayList<>();
     /**
      * The bounding boxes represent the bounds of the arms.
      **/
@@ -55,17 +55,33 @@ public class RobotModel {
      * @param position The position to be set
      */
     public void addAxis(int index, boolean start, Vector3d position) {
-        if (index > axes.length - 1) {
-            log.error("Index out of bounds for axis");
-            throw new ArrayIndexOutOfBoundsException();
+        Axis axis = findAxis(index);
+
+        if (axis == null) {
+            axis = new Axis();
+            axes.add(axis);
+            axis.setAxisNumber(index);
         }
-        if (axes[index] == null) {
-            axes[index] = new Axis();
-        }
+
         if (start) {
-            axes[index].setStart(position);
+            axis.setStart(position);
         } else {
-            axes[index].setEnd(position);
+            axis.setEnd(position);
         }
+    }
+
+    /**
+     * Finds an axis given its number
+     *
+     * @param axisNumber The axis number
+     * @return The axis if found, else null
+     */
+    public Axis findAxis(int axisNumber) {
+        for (Axis axe : axes) {
+            if (axe.getAxisNumber() == axisNumber) {
+                return axe;
+            }
+        }
+        return null;
     }
 }

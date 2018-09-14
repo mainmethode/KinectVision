@@ -1,9 +1,6 @@
 package de.rwth.i5.kinectvision.robot;
 
-import de.rwth.i5.kinectvision.machinevision.model.Face;
-import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
-import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
-import de.rwth.i5.kinectvision.machinevision.model.Triangle;
+import de.rwth.i5.kinectvision.machinevision.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -23,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * Class for parsing a file containing the 3d bounding box model for the robot
- *
+ * <p>
  * VERY IMPORTANT NOTICE: CHOOSE Y FORWARD, Z UP IN BLENDER!!!
  */
 @Slf4j
@@ -54,7 +51,7 @@ public class ModelFileParser {
         //Handle every group item for the 3d models
         for (int i = 0; i < nList.getLength(); i++) {
             RobotPart part = handleGroup(nList.item(i));
-            res.addRobotPart(part);
+//            res.addRobotPart(part);
         }
 
         /*
@@ -65,9 +62,64 @@ public class ModelFileParser {
         for (int i = 0; i < transformList.getLength(); i++) {
             handleAxisDummy(res, transformList.item(i));
             handleMarkerDummy(res, transformList.item(i));
+            handleArmGroup(res, transformList.item(i));
         }
 
         return res;
+    }
+
+    /**
+     * This method parses the given node and creates a RobotPart object in the robot if possible.
+     *
+     * @param robot The robot to append the part
+     * @param node  The node containing the information
+     */
+    private static void handleArmGroup(RobotModel robot, Node node) {
+        Node temp = node.getAttributes().getNamedItem("DEF");
+        if (temp == null) return;
+        String name = temp.getNodeValue();
+
+        if (name.startsWith("base")) {
+            name = "base";
+        } else if (name.startsWith("arm_")) {
+            name = name.substring(0, name.length() - 10);
+        } else {
+            return;
+        }
+        //Get arm name without TRANSFORM
+        RobotPart robotPart = new RobotPart();
+
+        robotPart.setName(name);
+        //Get bounding spheres
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+
+            robotPart.getBoundingSpheres().add(parseBoundingTransform(children.item(i)));
+        }
+        //Add the part to the robot
+        robot.addRobotPart(robotPart);
+    }
+
+    private static BoundingSphere parseBoundingTransform(Node node) {
+        if (node == null || node.getAttributes() == null) return null;
+
+        //Get translation String if available
+        Node temp = node.getAttributes().getNamedItem("translation");
+        if (temp == null) return null;
+        String position = temp.getNodeValue();
+        //Get scale String
+        temp = node.getAttributes().getNamedItem("scale");
+        if (temp == null) return null;
+        String scale = temp.getNodeValue();
+
+        //Create sphere
+        Vector3d center = parseTranslationString(position);
+        Vector3d radius = parseTranslationString(scale);
+        if (center == null || radius == null) {
+            log.debug("Translation or scale could not be parsed");
+            return null;
+        }
+        return new BoundingSphere(center, radius.x);
     }
 
     /**
@@ -144,14 +196,13 @@ public class ModelFileParser {
             log.error("Translation is invalid. Size < 3");
             return null;
         }
-        Vector3d res = new Vector3d(values.get(0), values.get(1), values.get(2));
-        return res;
+        return new Vector3d(values.get(0), values.get(1), values.get(2));
     }
 
     /**
      * Method for parsing the groups containing the cubes
      *
-     * @param node
+     * @param node The node to be handled
      */
     private static RobotPart handleGroup(Node node) {
         log.debug("Handle group");

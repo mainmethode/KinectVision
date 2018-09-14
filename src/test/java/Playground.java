@@ -241,9 +241,11 @@ public class Playground {
         kinectClient.setClientId("asdf");
         kinectClient.setDepthTopic("asdf");
 
+
         //Set the frame handler
         KinectHandler handler = new KinectHandler();
         kinectClient.setFrameHandler(handler);
+
 
 
         /*
@@ -253,7 +255,7 @@ public class Playground {
 
         Robot robot = new Robot();
         RobotModel robotModel;
-        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\robot.x3d"));
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
         handler.setRobot(robot);
         /*
          * Initialize the evaluator
@@ -262,7 +264,6 @@ public class Playground {
         Evaluation evaluation = new Evaluation();
         evaluation.setRobot(robot);
         handler.setEvaluation(evaluation);
-
         try {
             //Connect to kinect
             kinectClient.initialize();
@@ -271,6 +272,8 @@ public class Playground {
         }
         while (true) {
         }
+//        KinectDataStore.readInfraredData();
+//KinectDataStore.readDepthData();
     }
 
     //    @Test

@@ -9,4 +9,5 @@ import javax.vecmath.Vector3d;
 @Setter
 public class Axis {
     private Vector3d start, end;
+    private int axisNumber;
 }

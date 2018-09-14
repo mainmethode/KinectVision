@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotNull;
 public class ModelFileParserTest {
 
 
-    @Test
+    //    @Test
     public void testParseFile() {
         RobotModel robotModel = null;
         try {
@@ -48,4 +48,24 @@ public class ModelFileParserTest {
         assertEquals(new Marker3d(1, new Vector3d(1, -1, -1)), robotModel.getBasePoints().get(1));
         assertEquals(new Marker3d(2, new Vector3d(-1, -1, 1)), robotModel.getBasePoints().get(0));
     }
+
+    @Test
+    public void testRobotCreation() {
+        RobotModel robotModel = null;
+        try {
+            robotModel = ModelFileParser.parseFile(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln.x3d"));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+
+        assertNotNull(robotModel);
+        assertNotNull(robotModel.getBasePoints());
+        assertNotNull(robotModel.getRobotParts());
+        assertNotNull(robotModel.getAxes());
+
+        assertEquals(5, robotModel.getAxes().size());
+        assertEquals(6, robotModel.getRobotParts().size());
+        assertEquals(3, robotModel.getBasePoints().size());
+    }
+
 }

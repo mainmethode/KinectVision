@@ -1,6 +1,7 @@
 package de.rwth.i5.kinectvision.robot;
 
 import de.rwth.i5.kinectvision.machinevision.SVD;
+import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
@@ -25,14 +26,15 @@ import java.util.List;
 @Slf4j
 public class Robot {
     private SVD svd = new SVD();
-
+    private Object lock = new Object();
     private RobotModel robotModel;
     private double[] angles = new double[3];
     @Getter
     private boolean initialized = false;
     @Getter
     private ArrayList<Marker3d> bases = new ArrayList<>();
-    double ang = 0;
+    private PolygonMesh currentPolygonModel;
+    private ArrayList<BoundingSphere> currentBoundingSpheres;
 
     /**
      * Sets the angle of the given axis
@@ -139,17 +141,6 @@ public class Robot {
         this.bases = marker3dList;
     }
 
-    public static Matrix4d getScaleMatrix(Vector3d scalePoint, double scaleFactor) {
-        Matrix4d res = new Matrix4d();
-        res.setIdentity();
-        res.mul(scaleFactor);
-        res.m33 = 1;
-        res.m03 = (1 - scaleFactor) * scalePoint.x;
-        res.m13 = (1 - scaleFactor) * scalePoint.y;
-        res.m23 = (1 - scaleFactor) * scalePoint.z;
-        return res;
-    }
-
     /**
      * Returns the combined polygon model without transformations by markers
      *
@@ -176,27 +167,6 @@ public class Robot {
         return normalE1.angle(normalE2);
     }
 
-    private Matrix4d generateTranslationMatrix() {
-        return generateTranslationMatrix(robotModel.getBasePoints().get(0).getPosition(), bases.get(0).getPosition());
-    }
-
-    private Matrix4d generateTranslationMatrix(Vector3d from, Vector3d to) {
-        Matrix4d translationMatrix = new Matrix4d();
-        translationMatrix.setIdentity();
-        translationMatrix.m03 = to.x - from.x;
-        translationMatrix.m13 = to.y - from.y;
-        translationMatrix.m23 = to.z - from.z;
-        return translationMatrix;
-    }
-
-    public static double angle(Vector3d v1, Vector3d v2) {
-        double angle = v1.angle(v2);
-        if (v1.x * v2.y - v1.y * v2.x < 0)
-            angle = -angle;
-        return angle;
-    }
-
-
     /**
      * Generates the robot from files
      *
@@ -219,7 +189,6 @@ public class Robot {
      * @return A real-world 3d representation of the robot with its current configuration.
      */
     public PolygonMesh getCurrentRealWorldModel() {
-
         /*
         TODO Whole model generation respecting the current axis orientations
          */
@@ -287,7 +256,86 @@ public class Robot {
         Triangle.transformVector(transformationMatrix, res.getMarker2());
         Triangle.transformVector(transformationMatrix, res.getMarker3());
         return res;
+    }
 
+    /**
+     * This method generates a real world 3d representation of the robot.
+     * Here the loaded robot model, the current axis orientations and the base positions are respected.
+     * Thus, the returned model is already transformed and aligned to match the Kinect's coordinate system.
+     */
+    public ArrayList<BoundingSphere> transformRobot() {
+        //Get BSpheres from robot parts
+
+        ArrayList<BoundingSphere> boundingSpheres = new ArrayList<>();
+        for (RobotPart robotPart : robotModel.getRobotParts()) {
+            if (robotPart != null && robotPart.getBoundingSpheres() != null)
+                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
+                    if (boundingSphere != null && boundingSphere.getCenter() != null)
+                        //Clone the spheres
+                        boundingSpheres.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
+                }
+        }
+        /*
+        TODO Whole model generation respecting the current axis orientations
+         */
+        /*
+        Transformation
+         */
+        //Get the base points
+        if (bases.size() < 3) {
+            log.error("Not enough (" + bases.size() + ") marker positions set for the robot. At least 3 needed!");
+            return null;
+        }
+        /*
+         * The first three recognized markers
+         */
+        Marker3d marker1, marker2, marker3;
+        marker1 = bases.get(0);
+        marker2 = bases.get(1);
+        marker3 = bases.get(2);
+
+        /*
+         * The matching markers according to IDs
+         */
+        Marker3d base1 = null, base2 = null, base3 = null;
+        for (Marker3d marker3d : robotModel.getBasePoints()) {
+            if (marker3d.getId() == marker1.getId()) {
+                base1 = marker3d;
+            } else if (marker3d.getId() == marker2.getId()) {
+                base2 = marker3d;
+            } else if (marker3d.getId() == marker3.getId()) {
+                base3 = marker3d;
+            }
+        }
+        if (base1 == null || base2 == null || base3 == null) {
+            log.error("No matching base found");
+            return null;
+        }
+
+        ArrayList<RealVector> modelMarkers = new ArrayList<>();
+        ArrayList<RealVector> realMarkers = new ArrayList<>();
+
+
+        modelMarkers.add(vectorToRealVector(base1.getPosition()));
+        modelMarkers.add(vectorToRealVector(base2.getPosition()));
+        modelMarkers.add(vectorToRealVector(base3.getPosition()));
+
+        realMarkers.add(vectorToRealVector(marker1.getPosition()));
+        realMarkers.add(vectorToRealVector(marker2.getPosition()));
+        realMarkers.add(vectorToRealVector(marker3.getPosition()));
+        svd.calculateRotationTranslation(modelMarkers, realMarkers);
+
+        Matrix4d transformationMatrix = generateTransformationMatrix(svd.getRotationMatrix(), svd.getTranslation());
+
+
+        for (BoundingSphere boundingSphere : boundingSpheres) {
+            Triangle.transformVector(transformationMatrix, boundingSphere.getCenter());
+        }
+        // Do this
+//        synchronized (lock) {
+//            currentBoundingSpheres = boundingSpheres;
+//        }
+        return boundingSpheres;
     }
 
     /**

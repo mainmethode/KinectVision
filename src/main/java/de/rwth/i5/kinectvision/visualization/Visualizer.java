@@ -2,6 +2,7 @@ package de.rwth.i5.kinectvision.visualization;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
@@ -20,7 +21,7 @@ public class Visualizer {
     ImagePanel panel = ShowImages.showWindow(buf, "Testvisualisierung");
     Graphics2D g = buf.createGraphics();
     PolygonMesh polygonMesh;
-    BasicStroke text = new BasicStroke(2);
+    BasicStroke text = new BasicStroke(10);
     BasicStroke normal = new BasicStroke(1);
     int markerSize = 10;
     int scale = 100;
@@ -63,7 +64,7 @@ public class Visualizer {
         });
     }
 
-    public void visualizeHumans(ArrayList<Vector3d> humans, Robot robot) {
+    public void visualizeHumans(ArrayList<Vector3d> humans, PolygonMesh polygonMesh, Robot robot, ArrayList<BoundingSphere> spheres, Vector3d nearestRob, Vector3d nearestHum) {
         g.setStroke(normal);
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
@@ -76,11 +77,25 @@ public class Visualizer {
             }
         }
 
+        g.setColor(Color.YELLOW);
+//        ArrayList<BoundingSphere> spheres = robot.transformRobot();
+        if (spheres != null)
+            for (BoundingSphere boundingSphere : spheres) {
+                g.fillOval(convertValue(boundingSphere.getCenter().x - boundingSphere.getRadius()), convertValue(boundingSphere.getCenter().z - boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * scale * 2)), ((int) (boundingSphere.getRadius() * scale * 2)));
+            }
 
+        if (nearestHum != null && nearestRob != null) {
+            g.setColor(Color.WHITE);
+            g.setStroke(text);
+            g.drawLine(convertValue(nearestHum.x), convertValue(nearestHum.z), convertValue(nearestRob.x), convertValue(nearestRob.z));
+            g.setStroke(normal);
+
+        }
         //Show robot
         g.setColor(Color.YELLOW);
-        polygonMesh = robot.getCurrentRealWorldModel();
-        if (polygonMesh != null) {
+//        polygonMesh = robot.getCurrentRealWorldModel();
+//        if (polygonMesh != null) {
+        if (false) {
             for (Triangle face : robot.getCurrentRealWorldModel()) {
                 g.drawLine(convertValue(face.a.x), convertValue(face.a.z), convertValue(face.b.x), convertValue(face.b.z));
                 g.drawLine(convertValue(face.b.x), convertValue(face.b.z), convertValue(face.c.x), convertValue(face.c.z));
@@ -110,12 +125,6 @@ public class Visualizer {
             if (polygonMesh.getMarker3() != null) {
                 g.fillRect(convertValue(polygonMesh.getMarker3().x) - 2, convertValue(polygonMesh.getMarker3().z) - 2, 14, 14);
             }
-        }
-        try {
-            System.out.println("DIST: " + robot.getBases().get(0).getPosition());
-            System.out.println("DIST2: " + robot.getBases().get(1).getPosition());
-        } catch (Exception e) {
-
         }
         g.setColor(Color.CYAN);
         g.fillRect(convertValue(0) - 5, convertValue(0) - 5, 10, 10);
