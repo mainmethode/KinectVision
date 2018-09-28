@@ -84,4 +84,20 @@ public class RobotModel {
         }
         return null;
     }
+
+
+    /**
+     * Finds a robot part with the name "arm_" + number
+     *
+     * @param number The number of the arm (nearest to base = 0)
+     * @return The part if found, else null
+     */
+    public RobotPart getRobotPartByNumber(int number) {
+        for (RobotPart robotPart : robotParts) {
+            if (robotPart.getName().equals("arm_" + number)) {
+                return robotPart;
+            }
+        }
+        return null;
+    }
 }

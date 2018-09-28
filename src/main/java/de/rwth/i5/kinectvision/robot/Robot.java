@@ -12,6 +12,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.xml.sax.SAXException;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,7 +29,7 @@ public class Robot {
     private SVD svd = new SVD();
     private Object lock = new Object();
     private RobotModel robotModel;
-    private double[] angles = new double[3];
+    private double[] angles = new double[6];
     @Getter
     private boolean initialized = false;
     @Getter
@@ -82,6 +83,16 @@ public class Robot {
         Matrix4d rotationMatrix = new Matrix4d();
 
         rotationMatrix.setIdentity();
+
+        for (int i = 0; i < robotModel.getRobotParts().size(); i++) {
+            RobotPart part = robotModel.getRobotPartByNumber(i);
+            if (part == null) {
+                log.error("Robot part has not been found. Cannot transform robot");
+                return null;
+            }
+//            Matrix4d partRotation =
+
+        }
 
         for (RobotPart robotPart : partList) {
             Matrix4d calcMatrix = new Matrix4d();
@@ -152,6 +163,12 @@ public class Robot {
         Whole model generation respecting the current axis orientations
          */
         //Add all robot parts to the resulting model
+        Matrix3d rotationMatrix;
+
+        for (int i = 0; i < this.robotModel.getRobotParts().size(); i++) {
+
+        }
+
         for (RobotPart rp : this.robotModel.getRobotParts()) {
             res.combine(rp.getBoundingBox());
         }
