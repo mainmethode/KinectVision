@@ -1,10 +1,12 @@
 package robot;
 
+import TestTools.RobotSimulationClient;
 import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
+import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.robot.RobotModel;
 import de.rwth.i5.kinectvision.robot.RobotPart;
 import org.junit.Test;
@@ -342,5 +344,11 @@ public class RobotTest {
         assertEquals(new BoundingSphere(new Vector3d(0, 0, 0), 1), testObj.get(0));
         assertEquals(new BoundingSphere(new Vector3d(0, -1, 1), 1), testObj.get(1));
         assertTrue(new BoundingSphere(new Vector3d(1, -2, 1), 1).epsilonEquals(testObj.get(2), 1E-6));
+    }
+
+    //    @Test
+    public static void main(String args[]) {
+        RobotSimulationClient c = new RobotSimulationClient(new RobotClient());
+        c.startSimulation();
     }
 }
