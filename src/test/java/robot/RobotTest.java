@@ -1,9 +1,12 @@
 package robot;
 
+import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
+import de.rwth.i5.kinectvision.robot.RobotModel;
+import de.rwth.i5.kinectvision.robot.RobotPart;
 import org.junit.Test;
 
 import javax.vecmath.Matrix4d;
@@ -173,11 +176,49 @@ public class RobotTest {
     }
 
     /**
+     * Loads the model of the robot
+     */
+    public static RobotModel generateSampleRobotModel() {
+        //Creates a standard cube
+        RobotModel robotModel = new RobotModel();
+        robotModel.addBasePoint(new Marker3d(1, new Vector3d(-1f, -1f, -1f)));
+        robotModel.addBasePoint(new Marker3d(2, new Vector3d(1f, -1f, -1f)));
+        robotModel.addBasePoint(new Marker3d(3, new Vector3d(-1, -1, 1)));
+
+        RobotPart base = new RobotPart();
+        BoundingSphere boundingSphere = new BoundingSphere(new Vector3d(0, 0, 0), 1);
+        base.setName("base");
+        base.getBoundingSpheres().add(boundingSphere);
+
+        RobotPart arm0 = new RobotPart();
+        BoundingSphere boundingSphere1 = new BoundingSphere(new Vector3d(0, 0, 2), 1);
+        arm0.setName("arm_0");
+        arm0.getBoundingSpheres().add(boundingSphere1);
+
+        robotModel.addAxis(0, true, new Vector3d(0, 0, 1));
+        robotModel.addAxis(0, false, new Vector3d(1, 0, 1));
+
+        RobotPart arm1 = new RobotPart();
+        BoundingSphere boundingSphere2 = new BoundingSphere(new Vector3d(0, 0, 4), 1);
+        arm1.setName("arm_1");
+        arm1.getBoundingSpheres().add(boundingSphere2);
+
+        robotModel.addAxis(1, true, new Vector3d(0, 0, 3));
+        robotModel.addAxis(1, false, new Vector3d(0, 1, 3));
+
+
+        robotModel.addRobotPart(base);
+        robotModel.addRobotPart(arm0);
+        robotModel.addRobotPart(arm1);
+        return robotModel;
+    }
+
+    /**
      * This tests checks if the transformation of the robot model according to marker positions does work.
      * As a reference a cube representing the robot has been translated in a 3D program to determine the
      * matrices. Three points M1,M2,M3 are set and the cube should be rotated using every axis.
      */
-    @Test
+//    @Test
     public void testRealWorldTransformationEveryAxis() {
         //Initialize the robot
         Robot robot = new Robot();
@@ -273,5 +314,33 @@ public class RobotTest {
         createTestOutput(testObj, true);
         //Every triangle should have a match
         assertEquals(6, matches);
+    }
+
+    @Test
+    public void testGetRobotWithOrientationNoRotation() {
+        Robot robot;
+        robot = new Robot();
+        robot.setRobotModel(generateSampleRobotModel());
+        robot.setAngles(new double[]{0, 0, 0, 0, 0, 0});
+        ArrayList<BoundingSphere> testObj = robot.getRobotWithOrientation();
+
+
+        assertEquals(new BoundingSphere(new Vector3d(0, 0, 0), 1), testObj.get(0));
+        assertEquals(new BoundingSphere(new Vector3d(0, 0, 2), 1), testObj.get(1));
+
+    }
+
+    @Test
+    public void testGetRobotWithOrientation90Rotation() {
+        Robot robot;
+        robot = new Robot();
+        robot.setRobotModel(generateSampleRobotModel());
+        robot.setAngles(new double[]{90, 90, 0, 0, 0, 0});
+        ArrayList<BoundingSphere> testObj = robot.getRobotWithOrientation();
+
+
+        assertEquals(new BoundingSphere(new Vector3d(0, 0, 0), 1), testObj.get(0));
+        assertEquals(new BoundingSphere(new Vector3d(0, -1, 1), 1), testObj.get(1));
+        assertTrue(new BoundingSphere(new Vector3d(1, -2, 1), 1).epsilonEquals(testObj.get(2), 1E-6));
     }
 }

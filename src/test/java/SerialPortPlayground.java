@@ -15,8 +15,9 @@ public class SerialPortPlayground {
 
     public static void main(String[] args) {
 //        SerialPort.getCommPorts();
-        byte[] bytes = new byte[]{(byte) 0xAF, 0xB, 0x1};
-        System.out.println(bytesToHex(bytes));
+//        byte[] bytes = new byte[]{(byte) 0xAF, 0xB, 0x1};
+//        System.out.println(bytesToHex(bytes));
+//        printPortNames();
     }
 
     public static void printPortNames() {

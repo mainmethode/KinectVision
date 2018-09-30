@@ -19,7 +19,6 @@ public class MqttKinectTest {
         kinectClient = new KinectClient();
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("asdf");
-        kinectClient.setDepthTopic("asdf");
 
         KinectVisualizationClient myKinect = new KinectVisualizationClient(kinectClient);
     }

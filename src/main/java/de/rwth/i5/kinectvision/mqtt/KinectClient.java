@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.nustaq.serialization.FSTConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,14 +24,9 @@ public class KinectClient implements FrameSource {
     @Setter
     private FrameHandler frameHandler;
     @Setter
-    @Value("${mqtt.kinect.broker}")
     private String broker;
     @Setter
-    @Value("${mqtt.kinect.client_id}")
     private String clientId;
-    @Setter
-    @Value("${mqtt.kinect.depth_topic}")
-    private String depthTopic;
 
     private static FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 

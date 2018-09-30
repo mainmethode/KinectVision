@@ -37,7 +37,6 @@ public class Screenshotter {
         kinectClient = new KinectClient();
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("Sample Client");
-        kinectClient.setDepthTopic("");
         buf = new BufferedImage(512, 424, BufferedImage.TYPE_4BYTE_ABGR);
         initKinect();
     }

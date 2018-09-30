@@ -4,58 +4,50 @@ package de.rwth.i5.kinectvision;
 import de.rwth.i5.kinectvision.analysis.Evaluation;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
+import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 
-@Configuration
-@ImportResource("classpath:spring.xml")
-@EnableConfigurationProperties
+import java.io.File;
+
 /**
  * Main class for starting
  */
-public class Application implements CommandLineRunner {
+public class Application {
     public static final String MqttUrl = "";
 
     public static void main(String[] args) {
-        //Start the Application
-        ConfigurableApplicationContext context =
-                SpringApplication.run(Application.class);
-        /*
-        Initialize the KinectClient which listens to the Mqtt messages
-         */
-        KinectClient kinectClient = context.getBean(KinectClient.class);
+        //Set up mqtt client for kinect
+        KinectClient kinectClient = new KinectClient();
+        kinectClient.setBroker("tcp://localhost:1883");
+        kinectClient.setClientId("client_kinect");
+
         //Set the frame handler
         KinectHandler handler = new KinectHandler();
         kinectClient.setFrameHandler(handler);
-        try {
-            kinectClient.initialize();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
 
         /*
         Initialize the RobotClient
          */
         RobotClient robotClient = new RobotClient();
-        handler.setRobot(robotClient.getRobot());
 
+        //Generate the robot
+        Robot robot = new Robot();
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
+        handler.setRobot(robot);
         /*
          * Initialize the evaluator
          */
         Evaluation evaluation = new Evaluation();
+        evaluation.setRobot(robot);
         handler.setEvaluation(evaluation);
-
-    }
-
-
-    @Override
-    public void run(String... args) throws Exception {
-
+        try {
+            //Connect to kinect
+            kinectClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+        while (true) {
+        }
     }
 }

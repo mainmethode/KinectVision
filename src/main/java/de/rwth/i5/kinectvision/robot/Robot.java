@@ -6,6 +6,7 @@ import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -28,14 +29,16 @@ import java.util.List;
 public class Robot {
     private SVD svd = new SVD();
     private Object lock = new Object();
+    @Getter
+    @Setter
     private RobotModel robotModel;
+    @Setter
+    @Getter
     private double[] angles = new double[6];
     @Getter
     private boolean initialized = false;
     @Getter
     private ArrayList<Marker3d> bases = new ArrayList<>();
-    private PolygonMesh currentPolygonModel;
-    private ArrayList<BoundingSphere> currentBoundingSpheres;
 
     /**
      * Sets the angle of the given axis
@@ -49,61 +52,76 @@ public class Robot {
 
     //TODO load model and add parameter for model (file) in method
 
-    /**
-     * Loads the model of the robot
-     */
-    public void generateSampleRobotModel() {
-        //Creates a standard cube
-        robotModel = new RobotModel();
-        robotModel.addBasePoint(new Marker3d(1, new Vector3d(-1f, -1f, -1f)));
-        robotModel.addBasePoint(new Marker3d(2, new Vector3d(1f, -1f, -1f)));
-        robotModel.addBasePoint(new Marker3d(3, new Vector3d(-1, -1, 1)));
-    }
-
 
     /**
      * This method returns a model of the robot in its current orientation (the axis angles)
      *
      * @return The model of the robot
      */
-    public PolygonMesh getRobotWithOrientation() {
+    public ArrayList<BoundingSphere> getRobotWithOrientation() {
         //The resulting model
-        PolygonMesh res = new PolygonMesh();
+        ArrayList<BoundingSphere> res = new ArrayList<>();
         //Iterate over every part of the robot
         List<RobotPart> partList = robotModel.getRobotParts();
 
         //First add the base
         for (RobotPart robotPart : partList) {
             if (robotPart.getName().startsWith("base")) {
-                res.combine(robotPart.getBoundingBox());
+                res.addAll(robotPart.getBoundingSpheres());
                 break;
             }
         }
 
         Matrix4d rotationMatrix = new Matrix4d();
-
+        //TODO: TRANSLATION AXIS!
         rotationMatrix.setIdentity();
-
-        for (int i = 0; i < robotModel.getRobotParts().size(); i++) {
+        //Then transform every axis accordingly
+        for (int i = 0; i < robotModel.getRobotParts().size() - 1; i++) {
             RobotPart part = robotModel.getRobotPartByNumber(i);
             if (part == null) {
-                log.error("Robot part has not been found. Cannot transform robot");
+                log.error("Robot part 'arm_" + i + "' has not been found. Cannot transform robot");
                 return null;
             }
-//            Matrix4d partRotation =
-
+            //Achse finden
+            Axis axis = robotModel.findAxis(i);
+            //Startpunkt der Achse gibt Rotationspunkt an
+            Vector3d rotOrigin = new Vector3d(axis.getStart());
+            Triangle.transformVector(rotationMatrix, rotOrigin);
+            //Rotationsvektor Achse start bis Achse ende
+            Vector3d rotAxis = new Vector3d();
+            Vector3d rotEnd = new Vector3d(axis.getEnd());
+            Triangle.transformVector(rotationMatrix, rotEnd);
+            rotAxis.sub(rotEnd, rotOrigin);
+            //Winkel nach Achse
+            double angle = Math.toRadians(angles[i]);
+            //Rotationsmatrix_achse = Rotation um Achse
+            Matrix4d rotationMatrixAxis = rotationMatrixArbitraryAxisFromPoint(angle, rotAxis, rotOrigin);
+            //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
+            rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
+            //Transformiere Part mit Rotation_gesamt
+            res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
         }
 
-        for (RobotPart robotPart : partList) {
-            Matrix4d calcMatrix = new Matrix4d();
-            calcMatrix.mul(rotationMatrix);
-            res.combine(PolygonMesh.transform(calcMatrix, robotPart.getBoundingBox()));
-            rotationMatrix = calcMatrix;
-            //TODO: Check if Matrix order is right
-            //TODO: Check if the order of robotParts is right
-        }
+        return res;
+    }
 
-        log.error("Not implemented yet. getRobotWithOrientation");
+    /**
+     * Creates the rotation matrix for a rotation about an arbitrary axis with an origin point
+     *
+     * @param angle     The angle in rad
+     * @param rotAxis   Axis vector
+     * @param rotOrigin The origin point
+     * @return The rotation matrix
+     */
+    private Matrix4d rotationMatrixArbitraryAxisFromPoint(double angle, Vector3d rotAxis, Vector3d rotOrigin) {
+        Matrix4d translationMatrix = generateTranslationMatrix(rotOrigin, new Vector3d());
+        Matrix4d rotationMatrix = rotationMatrixArbitraryAxis(angle, rotAxis);
+        Matrix4d translationMatrixInverse = generateTranslationMatrix(new Vector3d(), rotOrigin);
+        Matrix4d res = new Matrix4d();
+        res.setIdentity();
+        res.mul(translationMatrixInverse);
+        res.mul(rotationMatrix);
+        res.mul(translationMatrix);
         return res;
     }
 
@@ -172,7 +190,6 @@ public class Robot {
         for (RobotPart rp : this.robotModel.getRobotParts()) {
             res.combine(rp.getBoundingBox());
         }
-
         return res;
     }
 
@@ -210,6 +227,7 @@ public class Robot {
         TODO Whole model generation respecting the current axis orientations
          */
         PolygonMesh res = getCombinedModel();
+//        PolygonMesh res = getRobotWithOrientation();
         //Add all robot parts to the resulting model
 //        res.combine(robotModel.getArm());
 
@@ -283,15 +301,16 @@ public class Robot {
     public ArrayList<BoundingSphere> transformRobot() {
         //Get BSpheres from robot parts
 
-        ArrayList<BoundingSphere> boundingSpheres = new ArrayList<>();
-        for (RobotPart robotPart : robotModel.getRobotParts()) {
-            if (robotPart != null && robotPart.getBoundingSpheres() != null)
-                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
-                    if (boundingSphere != null && boundingSphere.getCenter() != null)
-                        //Clone the spheres
-                        boundingSpheres.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
-                }
-        }
+        ArrayList<BoundingSphere> boundingSpheres;
+//        for (RobotPart robotPart : robotModel.getRobotParts()) {
+//            if (robotPart != null && robotPart.getBoundingSpheres() != null)
+//                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
+//                    if (boundingSphere != null && boundingSphere.getCenter() != null)
+//                        //Clone the spheres
+//                        boundingSpheres.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
+//                }
+//        }
+        boundingSpheres = getRobotWithOrientation();
         /*
         TODO Whole model generation respecting the current axis orientations
          */
@@ -384,5 +403,14 @@ public class Robot {
      */
     private RealVector vectorToRealVector(Vector3d vector3d) {
         return MatrixUtils.createRealVector(new double[]{vector3d.x, vector3d.y, vector3d.z});
+    }
+
+    private Matrix4d generateTranslationMatrix(Vector3d from, Vector3d to) {
+        Matrix4d translationMatrix = new Matrix4d();
+        translationMatrix.setIdentity();
+        translationMatrix.m03 = to.x - from.x;
+        translationMatrix.m13 = to.y - from.y;
+        translationMatrix.m23 = to.z - from.z;
+        return translationMatrix;
     }
 }

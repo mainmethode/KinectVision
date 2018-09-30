@@ -3,7 +3,6 @@ package de.rwth.i5.kinectvision.robot.serialconnection;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
-import de.rwth.i5.kinectvision.robot.RobotHandler;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,12 +1,13 @@
 package de.rwth.i5.kinectvision.robot;
 
+import de.rwth.i5.kinectvision.robot.serialconnection.RobotHandler;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * Class for handling the communication from and to the robot
  */
-public class RobotClient {
+public class RobotClient implements RobotHandler {
     @Getter
     @Setter
     private Robot robot;
@@ -44,5 +45,15 @@ onChange: (coords, angles, ...)
     public void sendData(Object data) {
         //TODO Send data to robot
         //TODO Determine format
+    }
+
+    @Override
+    public void onPositionEvent(Object o) {
+
+    }
+
+    @Override
+    public void onAxisData(double[] angles) {
+        robot.setAngles(angles);
     }
 }

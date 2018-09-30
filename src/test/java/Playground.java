@@ -161,7 +161,7 @@ public class Playground {
         Create a robot
          */
         Robot robot = new Robot();
-        robot.generateSampleRobotModel();
+//        robot.generateSampleRobotModel();
         //Place the model inside the model
 
         /*
@@ -239,7 +239,7 @@ public class Playground {
         KinectClient kinectClient = new KinectClient();
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("asdf");
-        kinectClient.setDepthTopic("asdf");
+//        kinectClient.setDepthTopic("asdf");
 
 
         //Set the frame handler
