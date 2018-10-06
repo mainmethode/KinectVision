@@ -12,6 +12,7 @@ import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.robot.RobotModel;
+import de.rwth.i5.kinectvision.visualization.Visualizer;
 import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -298,5 +299,37 @@ public class Playground {
         System.out.println(angle(v1, v3));
         System.out.println(angle(v1, v4));
 
+    }
+
+    @Test
+    public void testRobotTransformation() {
+
+
+
+        /*
+        Initialize the RobotClient
+         */
+//        RobotClient robotClient = new RobotClient();
+
+        Robot robot = new Robot();
+        RobotModel robotModel;
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
+
+        RobotClient robotClient = new RobotClient();
+        robotClient.setRobot(robot);
+
+        RobotSimulationClient robotSimulationClient = new RobotSimulationClient(robotClient);
+        robotSimulationClient.startSimulation();
+        Visualizer visualizer = new Visualizer();
+
+        while (true) {
+            visualizer.visualizeRobot(robot, robot.getRobotWithOrientation());
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }

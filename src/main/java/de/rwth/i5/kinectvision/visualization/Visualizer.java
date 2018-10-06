@@ -25,7 +25,7 @@ public class Visualizer {
     BasicStroke normal = new BasicStroke(1);
     int markerSize = 10;
     int scale = 100;
-    int tx = 600;
+    int tx = 60;
     double maxX = 0;
 
     public Visualizer() {
@@ -66,6 +66,7 @@ public class Visualizer {
     }
 
     private double maxZ = 0;
+    int sc = 70;
 
     public void visualizeHumans(ArrayList<Vector3d> humans, PolygonMesh polygonMesh, Robot robot, ArrayList<BoundingSphere> spheres, Vector3d nearestRob, Vector3d nearestHum) {
         g.setStroke(normal);
@@ -73,12 +74,13 @@ public class Visualizer {
         g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
         //Show human points from above
         g.setColor(Color.RED);
-        for (Vector3d human : humans) {
-            if (Math.abs(human.x) != Double.POSITIVE_INFINITY && Math.abs(human.y) != Double.POSITIVE_INFINITY && Math.abs(human.z) != Double.POSITIVE_INFINITY) {
+        if (humans != null)
+            for (Vector3d human : humans) {
+                if (Math.abs(human.x) != Double.POSITIVE_INFINITY && Math.abs(human.y) != Double.POSITIVE_INFINITY && Math.abs(human.z) != Double.POSITIVE_INFINITY) {
 //                buf.setRGB(((int) ((human.x + 10) * 40)), ((int) ((human.z + 10) * 40)), Color.RED.getRGB());
-                g.drawLine(convertValue(human.x), convertValue(human.z), convertValue(human.x), convertValue(human.z));
+                    g.drawLine(convertValue(human.x), convertValue(human.z), convertValue(human.x), convertValue(human.z));
+                }
             }
-        }
 
         g.setColor(Color.YELLOW);
 //        ArrayList<BoundingSphere> spheres = robot.transformRobot();
@@ -136,7 +138,25 @@ public class Visualizer {
         panel.setBufferedImage(buf);
     }
 
+    public void visualizeRobot(Robot robot, ArrayList<BoundingSphere> spheres) {
+        g.setStroke(normal);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
+
+        g.setColor(Color.YELLOW);
+        if (spheres != null)
+            for (BoundingSphere boundingSphere : spheres) {
+                g.fillOval(convertValue(boundingSphere.getCenter().x - boundingSphere.getRadius()), 1000 - convertValue(boundingSphere.getCenter().z + boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * sc * 2)), ((int) (boundingSphere.getRadius() * sc * 2)));
+            }
+        panel.setBufferedImage(buf);
+    }
+
     private int convertValue(double value) {
+//        return (int) (900 - value * sc);
+        return (int) (value * sc) + 40;
+    }
+
+    private int convertValue2(double value) {
         return (int) ((value + 10) * scale) - tx;
     }
 

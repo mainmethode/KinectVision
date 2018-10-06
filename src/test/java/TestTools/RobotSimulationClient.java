@@ -40,15 +40,29 @@ public class RobotSimulationClient {
         }
         */
 
-//        angles[axis]++;
-
-        if (angles[0] < 90) {
-            angles[0] += 0.1;
-        } else {
-            if (angles[1] > -90)
-                angles[1] -= 0.1;
+//        angles[0]++;
+        if (angles[0] < 180) {
+            angles[0]++;
+            return;
         }
+        if (angles[1] > -90) {
+            angles[1] -= 1;
+            return;
+        }
+        if (angles[2] > -90) {
+            angles[2] -= 1;
+            return;
+        }
+        if (angles[3] > -90) {
+            angles[3] -= 1;
+            return;
+        }
+        if (angles[4] > -180) {
+            angles[4] -= 2;
+            return;
+        }
+    }
+
 //        System.out.println(Math.toRadians(angles[axis]));
 //        if (angles[axis] == 360) angles[axis] = 0;
-    }
 }

@@ -102,7 +102,6 @@ public class Robot {
             //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
             rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
             //Transformiere Part mit Rotation_gesamt
-//            if (part.getName().equals("arm_2"))
             res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
         }
 
