@@ -21,6 +21,7 @@ public class BoundingSphere {
     public static Collection<? extends BoundingSphere> transform(Matrix4d rotationMatrix, List<BoundingSphere> boundingSpheres) {
         ArrayList<BoundingSphere> res = new ArrayList<>();
         for (BoundingSphere boundingSphere : boundingSpheres) {
+            if (boundingSphere == null || boundingSphere.getCenter() == null) continue;
             Vector3d newCenter = new Vector3d(boundingSphere.getCenter());
             Triangle.transformVector(rotationMatrix, newCenter);
             res.add(new BoundingSphere(newCenter, boundingSphere.getRadius()));

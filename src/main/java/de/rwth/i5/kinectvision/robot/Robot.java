@@ -67,7 +67,9 @@ public class Robot {
         //First add the base
         for (RobotPart robotPart : partList) {
             if (robotPart.getName().startsWith("base")) {
-                res.addAll(robotPart.getBoundingSpheres());
+                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
+                    res.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
+                }
                 break;
             }
         }
@@ -82,6 +84,7 @@ public class Robot {
                 log.error("Robot part 'arm_" + i + "' has not been found. Cannot transform robot");
                 return null;
             }
+
             //Achse finden
             Axis axis = robotModel.findAxis(i);
             //Startpunkt der Achse gibt Rotationspunkt an
@@ -99,6 +102,7 @@ public class Robot {
             //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
             rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
             //Transformiere Part mit Rotation_gesamt
+//            if (part.getName().equals("arm_2"))
             res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
         }
 
@@ -300,16 +304,19 @@ public class Robot {
      */
     public ArrayList<BoundingSphere> transformRobot() {
         //Get BSpheres from robot parts
-
         ArrayList<BoundingSphere> boundingSpheres;
-//        for (RobotPart robotPart : robotModel.getRobotParts()) {
-//            if (robotPart != null && robotPart.getBoundingSpheres() != null)
-//                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
-//                    if (boundingSphere != null && boundingSphere.getCenter() != null)
-//                        //Clone the spheres
-//                        boundingSpheres.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
-//                }
-//        }
+/*
+        ArrayList<BoundingSphere> boundingSpheres = new ArrayList<>();
+        for (RobotPart robotPart : robotModel.getRobotParts()) {
+            if (robotPart != null && robotPart.getBoundingSpheres() != null)
+                for (BoundingSphere boundingSphere : robotPart.getBoundingSpheres()) {
+                    if (boundingSphere != null && boundingSphere.getCenter() != null) {
+                        //Clone the spheres
+                        boundingSpheres.add(new BoundingSphere(new Vector3d(boundingSphere.getCenter()), boundingSphere.getRadius()));
+                    }
+                }
+        }
+        */
         boundingSpheres = getRobotWithOrientation();
         /*
         TODO Whole model generation respecting the current axis orientations

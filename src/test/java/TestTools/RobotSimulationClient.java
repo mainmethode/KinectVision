@@ -25,17 +25,30 @@ public class RobotSimulationClient {
                 }
                 changeAxisRandomly();
                 //TODO: Which format?
-//                robotClient.onAxisData(new double[]{1, 2, 3, 4, 5, 6});
-                for (double angle : angles) {
-                    System.out.println(angle);
-                }
+                robotClient.onAxisData(angles);
+//                for (double angle : angles) {
+//                    System.out.println(angle);
+//                }
             }
         }).start();
     }
 
     public void changeAxisRandomly() {
+        /*
         for (int i = 0; i < angles.length; i++) {
-            angles[i] += (Math.random() * 10) - 5;
+            angles[i] += (Math.random() * 2) - 1;
         }
+        */
+
+//        angles[axis]++;
+
+        if (angles[0] < 90) {
+            angles[0] += 0.1;
+        } else {
+            if (angles[1] > -90)
+                angles[1] -= 0.1;
+        }
+//        System.out.println(Math.toRadians(angles[axis]));
+//        if (angles[axis] == 360) angles[axis] = 0;
     }
 }

@@ -1,4 +1,5 @@
 import TestTools.KinectDataStore;
+import TestTools.RobotSimulationClient;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.analysis.Evaluation;
@@ -9,6 +10,7 @@ import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.robot.Robot;
+import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.robot.RobotModel;
 import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
@@ -264,13 +266,23 @@ public class Playground {
         Evaluation evaluation = new Evaluation();
         evaluation.setRobot(robot);
         handler.setEvaluation(evaluation);
+
+        RobotClient robotClient = new RobotClient();
+        robotClient.setRobot(robot);
+
+        RobotSimulationClient robotSimulationClient = new RobotSimulationClient(robotClient);
+        robotSimulationClient.startSimulation();
         try {
-            //Connect to kinect
+//        Connect to kinect
             kinectClient.initialize();
         } catch (MqttException e) {
             e.printStackTrace();
         }
+//        ArrayList<Marker3d> markers = new ArrayList<>();
+//        Marker3d marker3d = new Marker3d(1,1,1,1)
+//        robot.setRealWorldBasePositions(new ArrayList<>());
         while (true) {
+
         }
 //        KinectDataStore.readInfraredData();
 //KinectDataStore.readDepthData();

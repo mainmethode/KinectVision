@@ -26,6 +26,7 @@ public class Visualizer {
     int markerSize = 10;
     int scale = 100;
     int tx = 600;
+    double maxX = 0;
 
     public Visualizer() {
         g.setColor(Color.BLUE);
@@ -64,6 +65,8 @@ public class Visualizer {
         });
     }
 
+    private double maxZ = 0;
+
     public void visualizeHumans(ArrayList<Vector3d> humans, PolygonMesh polygonMesh, Robot robot, ArrayList<BoundingSphere> spheres, Vector3d nearestRob, Vector3d nearestHum) {
         g.setStroke(normal);
         g.setColor(Color.BLACK);
@@ -79,6 +82,7 @@ public class Visualizer {
 
         g.setColor(Color.YELLOW);
 //        ArrayList<BoundingSphere> spheres = robot.transformRobot();
+
         if (spheres != null)
             for (BoundingSphere boundingSphere : spheres) {
                 g.fillOval(convertValue(boundingSphere.getCenter().x - boundingSphere.getRadius()), convertValue(boundingSphere.getCenter().z - boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * scale * 2)), ((int) (boundingSphere.getRadius() * scale * 2)));

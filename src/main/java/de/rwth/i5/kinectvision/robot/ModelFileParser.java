@@ -93,8 +93,10 @@ public class ModelFileParser {
         //Get bounding spheres
         NodeList children = node.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-
-            robotPart.getBoundingSpheres().add(parseBoundingTransform(children.item(i)));
+            BoundingSphere boundingSphere = parseBoundingTransform(children.item(i));
+            if (boundingSphere != null) {
+                robotPart.getBoundingSpheres().add(boundingSphere);
+            }
         }
         //Add the part to the robot
         robot.addRobotPart(robotPart);
