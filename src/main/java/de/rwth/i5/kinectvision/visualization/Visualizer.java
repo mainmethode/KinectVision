@@ -25,7 +25,7 @@ public class Visualizer {
     BasicStroke normal = new BasicStroke(1);
     int markerSize = 10;
     int scale = 100;
-    int tx = 60;
+    int tx = 600;
     double maxX = 0;
 
     public Visualizer() {
@@ -146,17 +146,17 @@ public class Visualizer {
         g.setColor(Color.YELLOW);
         if (spheres != null)
             for (BoundingSphere boundingSphere : spheres) {
-                g.fillOval(convertValue(boundingSphere.getCenter().x - boundingSphere.getRadius()), 1000 - convertValue(boundingSphere.getCenter().z + boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * sc * 2)), ((int) (boundingSphere.getRadius() * sc * 2)));
+                g.fillOval(convertValue1(boundingSphere.getCenter().x - boundingSphere.getRadius()), 1000 - convertValue1(boundingSphere.getCenter().z + boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * sc * 2)), ((int) (boundingSphere.getRadius() * sc * 2)));
             }
         panel.setBufferedImage(buf);
     }
 
-    private int convertValue(double value) {
+    private int convertValue1(double value) {
 //        return (int) (900 - value * sc);
         return (int) (value * sc) + 40;
     }
 
-    private int convertValue2(double value) {
+    private int convertValue(double value) {
         return (int) ((value + 10) * scale) - tx;
     }
 

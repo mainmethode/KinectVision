@@ -8,19 +8,20 @@ import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
 import de.rwth.i5.kinectvision.robot.Robot;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
+@Slf4j
 public class KinectHandler implements FrameHandler {
-    //The last received infrared frame
-    short[] lastInfrared;
     private DepthModel lastDepth;
-    boolean calibrated = false;
+    private boolean calibrated = false;
     @Setter
     private Evaluation evaluation;
     @Setter
     Robot robot;
+    private CameraCalibration cameraCalibration = new CameraCalibration();
 
     /**
      * Kinect depth frame handler
@@ -32,9 +33,9 @@ public class KinectHandler implements FrameHandler {
         //Update the last received depth frame
         lastDepth = o;
         //Stop here if no calibration has been made yet TODO:
-//        if (!calibrated) {
-//            return;
-//        }
+        if (!calibrated) {
+            return;
+        }
         //Given the point cloud detect the humans in there
         ArrayList<Vector3d> humanPoints = MachineVision.detectHumans(o);
         // Evaluator handles accordingly to determine if an action is needed.
@@ -50,17 +51,31 @@ public class KinectHandler implements FrameHandler {
      */
     @Override
     public void OnInfraredFrame(short[] data) {
-        // Get the marker positions
-        if (lastDepth == null) return;
-        ArrayList<Marker3d> markers = CameraCalibration.generate3dMarkers(data, lastDepth);
-        try {
-            robot.setRealWorldBasePositions(markers);
-            calibrated = true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        //No need for calibration frames yet if the calibration has taken place
+        if (calibrated) {
+            return;
         }
 
+        // If there is no depth frame, skip
+        if (lastDepth == null) return;
 
+        //If the calibration is not done yet
+        if (!cameraCalibration.calibrate(data, lastDepth)) {
+            return;
+        }
+
+        //Else we check the result
+        ArrayList<Marker3d> calibrationResult = cameraCalibration.getMarkers();
+        //Not enough markers found
+        if (calibrationResult.size() < 3) {
+            log.error("Not enough markers found for calibration. Retry.");
+            //recreate the calibration object
+            cameraCalibration = new CameraCalibration();
+        } else {
+            log.info("Calibration successful.");
+            robot.setRealWorldBasePositions(calibrationResult);
+            calibrated = true;
+        }
     }
 
     @Override

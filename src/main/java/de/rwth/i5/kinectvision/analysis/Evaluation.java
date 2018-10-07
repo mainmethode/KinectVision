@@ -31,7 +31,7 @@ public class Evaluation {
         this.humanPoints = humanPoints;
 //        this.currentRobot = robot.getCurrentRealWorldModel();
         currentSpheres = robot.transformRobot();
-        System.out.println(checkDistance(humanPoints));
+        checkDistance(humanPoints);
         visualize();
         /*
         Check if the human is too close to the robot's bounding box
