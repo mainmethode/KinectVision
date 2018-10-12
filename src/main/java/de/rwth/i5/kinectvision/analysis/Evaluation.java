@@ -29,6 +29,7 @@ public class Evaluation {
     ArrayList<BoundingSphere> currentSpheres;
     Vector3d nearestHum, nearestRob;
     SwevaClient swevaClient;
+    double distance = Double.POSITIVE_INFINITY;
 
     public Evaluation() {
         swevaClient = new SwevaClient();
@@ -46,7 +47,7 @@ public class Evaluation {
         this.humanPoints = humanPoints;
 //        this.currentRobot = robot.getCurrentRealWorldModel();
         currentSpheres = robot.transformRobot();
-        checkDistance(humanPoints);
+        distance = checkDistance(humanPoints);
         visualize();
         /*
         Check if the human is too close to the robot's bounding box
@@ -84,7 +85,7 @@ public class Evaluation {
 
     public void visualize() {
 
-        swevaClient.publish(currentSpheres, humanPoints);
+        swevaClient.publish(currentSpheres, humanPoints, this.distance);
         //Send to MQTT
 //        visualizer.visualizeHumans(humanPoints, currentRobot, robot, currentSpheres, nearestRob, nearestHum);
     }

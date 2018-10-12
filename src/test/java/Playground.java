@@ -14,7 +14,6 @@ import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.robot.RobotModel;
-import de.rwth.i5.kinectvision.visualization.Visualizer;
 import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -324,7 +323,7 @@ public class Playground {
 
         RobotSimulationClient robotSimulationClient = new RobotSimulationClient(robotClient);
         robotSimulationClient.startSimulation();
-        Visualizer visualizer = new Visualizer();
+//        Visualizer visualizer = new Visualizer();
 
         SwevaClient swevaClient = new SwevaClient();
         swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
@@ -336,8 +335,8 @@ public class Playground {
         }
         while (true) {
             ArrayList<BoundingSphere> spheres = robot.getRobotWithOrientation();
-//            swevaClient.publish(spheres, null);
-            visualizer.visualizeRobot(robot, spheres);
+            swevaClient.publish(spheres, null, 0);
+//            visualizer.visualizeRobot(robot, spheres);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

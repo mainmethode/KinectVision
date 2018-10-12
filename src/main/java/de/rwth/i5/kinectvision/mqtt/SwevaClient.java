@@ -24,6 +24,7 @@ public class SwevaClient {
     @Setter
     private String clientId;
     double scale = 100;
+    double scaleH = 200;
     private MqttClient swevaClient;
 
     /**
@@ -39,30 +40,44 @@ public class SwevaClient {
         swevaClient.connect(connOpts);
     }
 
-    public void publish(ArrayList<BoundingSphere> spheres, ArrayList<Vector3d> humanList) {
+    public void publish(ArrayList<BoundingSphere> spheres, ArrayList<Vector3d> humanList, double distance) {
         try {
             JSONObject object = new JSONObject();
             JSONObject robot = new JSONObject();
             JSONObject humans = new JSONObject();
 
             JSONArray points = new JSONArray();
-
             humans.put("points", points);
             object.put("humans", humans);
+            if (distance == Double.POSITIVE_INFINITY) {
+                object.put("distance", -1);
+            } else {
+                object.put("distance", distance);
+            }
+
             JSONArray pointsOneHum = new JSONArray();
             points.put(pointsOneHum);
             int count = 0;
-            for (Vector3d vector3d : humanList) {
-                if (count++ == 10) {
-                    count = 0;
-                    JSONArray singlePoint = new JSONArray();
+            if (humanList != null) {
+                for (Vector3d vector3d : humanList) {
+                    if (count++ == 100) {
+                        count = 0;
+                        JSONArray singlePoint = new JSONArray();
 
-                    singlePoint.put(((int) (vector3d.x * scale)));
-                    singlePoint.put(((int) (vector3d.y * scale)));
-                    singlePoint.put(((int) (vector3d.z * scale)));
-                    pointsOneHum.put(singlePoint);
+                        singlePoint.put(((int) (vector3d.x * scaleH)));
+                        singlePoint.put(((int) (vector3d.y * scaleH)));
+                        singlePoint.put(((int) (vector3d.z * scaleH)));
+
+                        pointsOneHum.put(singlePoint);
+                    }
                 }
+
+                humans.put("count", humanList.size() > 0 ? 1 : 0);
+            } else {
+                humans.put("count", 0);
             }
+
+
             JSONArray spheresArray = new JSONArray();
             for (BoundingSphere sphere : spheres) {
                 JSONArray singleSphere = new JSONArray();
@@ -71,7 +86,6 @@ public class SwevaClient {
                 singleSphere.put(((int) (sphere.getCenter().y * scale)));
                 singleSphere.put(((int) (sphere.getCenter().z * scale)));
                 singleSphere.put(((int) (sphere.getRadius() * scale)));
-
                 spheresArray.put(singleSphere);
             }
 
