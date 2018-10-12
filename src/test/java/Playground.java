@@ -4,11 +4,13 @@ import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import de.rwth.i5.kinectvision.analysis.Evaluation;
 import de.rwth.i5.kinectvision.machinevision.FiducialFinder;
+import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
+import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.robot.RobotModel;
@@ -282,6 +284,8 @@ public class Playground {
 //        ArrayList<Marker3d> markers = new ArrayList<>();
 //        Marker3d marker3d = new Marker3d(1,1,1,1)
 //        robot.setRealWorldBasePositions(new ArrayList<>());
+
+
         while (true) {
 
         }
@@ -322,10 +326,20 @@ public class Playground {
         robotSimulationClient.startSimulation();
         Visualizer visualizer = new Visualizer();
 
+        SwevaClient swevaClient = new SwevaClient();
+        swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
+        swevaClient.setClientId("blablabla");
+        try {
+            swevaClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
         while (true) {
-            visualizer.visualizeRobot(robot, robot.getRobotWithOrientation());
+            ArrayList<BoundingSphere> spheres = robot.getRobotWithOrientation();
+//            swevaClient.publish(spheres, null);
+            visualizer.visualizeRobot(robot, spheres);
             try {
-                Thread.sleep(20);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

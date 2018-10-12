@@ -11,7 +11,7 @@ import java.util.Random;
 public class RobotSimulationClient {
     @Getter
     private double[] angles = new double[]{0, 0, 0, 0, 0, 0};
-    RobotClient robotClient;
+    private RobotClient robotClient;
     private int axis = 0;
     private int degree = 0;
     private boolean dir;

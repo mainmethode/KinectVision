@@ -2,10 +2,12 @@ package de.rwth.i5.kinectvision.analysis;
 
 import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
+import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.visualization.Visualizer;
 import lombok.Getter;
 import lombok.Setter;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -26,6 +28,19 @@ public class Evaluation {
     PolygonMesh currentRobot;
     ArrayList<BoundingSphere> currentSpheres;
     Vector3d nearestHum, nearestRob;
+    SwevaClient swevaClient;
+
+    public Evaluation() {
+        swevaClient = new SwevaClient();
+        swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
+//        swevaClient.setBroker("ws://127.0.0.1:9001");
+        swevaClient.setClientId("blablabla");
+        try {
+            swevaClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void evaluate(ArrayList<Vector3d> humanPoints) {
         this.humanPoints = humanPoints;
@@ -68,7 +83,9 @@ public class Evaluation {
     }
 
     public void visualize() {
+
+        swevaClient.publish(currentSpheres, humanPoints);
         //Send to MQTT
-        visualizer.visualizeHumans(humanPoints, currentRobot, robot, currentSpheres, nearestRob, nearestHum);
+//        visualizer.visualizeHumans(humanPoints, currentRobot, robot, currentSpheres, nearestRob, nearestHum);
     }
 }
