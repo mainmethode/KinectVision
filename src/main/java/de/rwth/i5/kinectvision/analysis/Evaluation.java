@@ -8,6 +8,7 @@ import de.rwth.i5.kinectvision.visualization.Visualizer;
 import lombok.Getter;
 import lombok.Setter;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -85,7 +86,11 @@ public class Evaluation {
 
     public void visualize() {
 
-        swevaClient.publish(currentSpheres, humanPoints, this.distance);
+        try {
+            swevaClient.publish(robot, currentSpheres, humanPoints, this.distance);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         //Send to MQTT
 //        visualizer.visualizeHumans(humanPoints, currentRobot, robot, currentSpheres, nearestRob, nearestHum);
     }

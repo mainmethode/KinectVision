@@ -18,6 +18,7 @@ import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
@@ -335,7 +336,11 @@ public class Playground {
         }
         while (true) {
             ArrayList<BoundingSphere> spheres = robot.getRobotWithOrientation();
-            swevaClient.publish(spheres, null, 0);
+            try {
+                swevaClient.publish(null, spheres, null, 0);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 //            visualizer.visualizeRobot(robot, spheres);
             try {
                 Thread.sleep(100);

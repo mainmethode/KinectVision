@@ -2,6 +2,8 @@ package de.rwth.i5.kinectvision.mqtt;
 
 
 import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
+import de.rwth.i5.kinectvision.machinevision.model.Marker3d;
+import de.rwth.i5.kinectvision.robot.Robot;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -23,8 +25,8 @@ public class SwevaClient {
     private String broker;
     @Setter
     private String clientId;
-    double scale = 100;
-    double scaleH = 200;
+    int scale = 100;
+    int scaleH = 200;
     private MqttClient swevaClient;
 
     /**
@@ -40,66 +42,114 @@ public class SwevaClient {
         swevaClient.connect(connOpts);
     }
 
-    public void publish(ArrayList<BoundingSphere> spheres, ArrayList<Vector3d> humanList, double distance) {
-        try {
-            JSONObject object = new JSONObject();
-            JSONObject robot = new JSONObject();
-            JSONObject humans = new JSONObject();
+    /**
+     * Method for sending data to SWEVA
+     *
+     * @param spheres   The spheres of the robot
+     * @param humanList The list containing the human points
+     * @param distance  The minimal distance between robot and human
+     * @throws JSONException If some value could not be converted
+     */
+    public void publish(ArrayList<BoundingSphere> spheres, ArrayList<Vector3d> humanList, double distance) throws JSONException {
+        publish(null, spheres, humanList, distance);
+    }
 
-            JSONArray points = new JSONArray();
-            humans.put("points", points);
-            object.put("humans", humans);
-            if (distance == Double.POSITIVE_INFINITY) {
-                object.put("distance", -1);
-            } else {
-                object.put("distance", distance);
-            }
+    /**
+     * Method for sending data to SWEVA
+     *
+     * @param rob       The robot object
+     * @param spheres   The spheres of the robot
+     * @param humanList The list containing the human points
+     * @param distance  The minimal distance between robot and human
+     * @throws JSONException If some value could not be converted
+     */
+    public void publish(Robot rob, ArrayList<BoundingSphere> spheres, ArrayList<Vector3d> humanList, double distance) throws JSONException {
+        JSONObject object = new JSONObject();
 
-            JSONArray pointsOneHum = new JSONArray();
-            points.put(pointsOneHum);
-            int count = 0;
-            if (humanList != null) {
-                for (Vector3d vector3d : humanList) {
-                    if (count++ == 100) {
-                        count = 0;
-                        JSONArray singlePoint = new JSONArray();
+        JSONObject humans = new JSONObject();
 
-                        singlePoint.put(((int) (vector3d.x * scaleH)));
-                        singlePoint.put(((int) (vector3d.y * scaleH)));
-                        singlePoint.put(((int) (vector3d.z * scaleH)));
 
-                        pointsOneHum.put(singlePoint);
-                    }
+        if (distance == Double.POSITIVE_INFINITY) {
+            object.put("distance", -1);
+        } else {
+            object.put("distance", distance);
+        }
+        //Add human points
+        JSONArray points = new JSONArray();
+        humans.put("points", points);
+        object.put("humans", humans);
+
+        JSONArray pointsOneHum = new JSONArray();
+        points.put(pointsOneHum);
+        int count = 0;
+        if (humanList != null) {
+            for (Vector3d vector3d : humanList) {
+                if (count++ == 100) {
+                    count = 0;
+                    pointsOneHum.put(vectorToArray(vector3d, scaleH));
                 }
-
-                humans.put("count", humanList.size() > 0 ? 1 : 0);
-            } else {
-                humans.put("count", 0);
             }
+            humans.put("count", humanList.size() > 0 ? 1 : 0);
+        } else {
+            humans.put("count", 0);
+        }
 
+        //Add robot stuff
+        JSONObject robot = new JSONObject();
+        object.put("robot", robot);
+        //The spheres
+        JSONArray spheresArray = new JSONArray();
+        robot.put("spheres", spheresArray);
+        for (BoundingSphere sphere : spheres) {
+            spheresArray.put(sphereToArray(sphere, scale));
+        }
 
-            JSONArray spheresArray = new JSONArray();
-            for (BoundingSphere sphere : spheres) {
-                JSONArray singleSphere = new JSONArray();
-
-                singleSphere.put(((int) (sphere.getCenter().x * scale)));
-                singleSphere.put(((int) (sphere.getCenter().y * scale)));
-                singleSphere.put(((int) (sphere.getCenter().z * scale)));
-                singleSphere.put(((int) (sphere.getRadius() * scale)));
-                spheresArray.put(singleSphere);
+        //Add the markers
+        JSONArray markersArray = new JSONArray();
+        robot.put("markers", markersArray);
+        if (rob != null && rob.getBases() != null) {
+            for (Marker3d marker3d : rob.getBases()) {
+                markersArray.put(vectorToArray(marker3d.getPosition(), scale));
             }
+        }
 
-
-            robot.put("spheres", spheresArray);
-            object.put("robot", robot);
-
-            try {
-                swevaClient.publish("sweva1", object.toString().getBytes(), 0, false);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
-        } catch (JSONException e) {
+        //Send it!
+        try {
+            swevaClient.publish("sweva1", object.toString().getBytes(), 0, false);
+        } catch (MqttException e) {
             e.printStackTrace();
         }
+
+    }
+
+    /**
+     * Converts a sphere to an array. The vector of the sphere and the radius are being scaled by a factor.
+     *
+     * @param sphere The sphere object
+     * @param scale  The scale factor
+     * @return The converted JSONArray
+     */
+    private JSONArray sphereToArray(BoundingSphere sphere, int scale) {
+        JSONArray res = new JSONArray();
+        res.put((int) (sphere.getCenter().x * scale));
+        res.put((int) (sphere.getCenter().y * scale));
+        res.put((int) (sphere.getCenter().z * scale));
+        res.put((int) (sphere.getRadius() * scale));
+        return res;
+    }
+
+    /**
+     * Converts a vector to an array. The vector is being scaled by a factor.
+     *
+     * @param vector3d The vector
+     * @param scale    The scale factor
+     * @return The converted JSONArray
+     */
+    public JSONArray vectorToArray(Vector3d vector3d, int scale) {
+        JSONArray res = new JSONArray();
+        res.put(((int) (vector3d.x * scale)));
+        res.put(((int) (vector3d.y * scale)));
+        res.put(((int) (vector3d.z * scale)));
+        return res;
     }
 }

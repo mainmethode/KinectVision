@@ -41,19 +41,6 @@ public class Robot {
     private ArrayList<Marker3d> bases = new ArrayList<>();
 
     /**
-     * Sets the angle of the given axis
-     *
-     * @param axis  The axis number (beginning from 0, base-first element axis)
-     * @param angle The angle to be set
-     */
-    public void setAxisAngle(int axis, double angle) {
-        angles[axis] = angle;
-    }
-
-    //TODO load model and add parameter for model (file) in method
-
-
-    /**
      * This method returns a model of the robot in its current orientation (the axis angles)
      *
      * @return The model of the robot
