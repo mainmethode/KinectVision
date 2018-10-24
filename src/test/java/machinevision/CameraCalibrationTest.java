@@ -25,7 +25,7 @@ public class CameraCalibrationTest {
         DepthModel depthData = KinectDataStore.readDepthData("KinectData\\depth_1_1marker_1300mm.bin");
 
         //Generate 3d markers
-        ArrayList<Marker3d> resultList = CameraCalibration.generate3dMarkers(infraredData, depthData);
+        ArrayList<Marker3d> resultList = CameraCalibration.generate3dMarkers(infraredData, depthData, null);
 
         //Test output
         assertNotNull(resultList);

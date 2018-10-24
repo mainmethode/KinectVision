@@ -1,12 +1,16 @@
 package de.rwth.i5.kinectvision.machinevision;
 
 import boofcv.abst.fiducial.FiducialDetector;
+import boofcv.core.image.ConvertImage;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.GrayS16;
+import boofcv.struct.image.GrayU16;
+import boofcv.struct.image.GrayU8;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +26,29 @@ import java.util.ArrayList;
  */
 @Slf4j
 public class FiducialFinder {
-    public static ArrayList<FiducialDetectionResult> findFiducialsFromBytes(short[] data) {
+    public static ArrayList<FiducialDetectionResult> findFiducialsFromBytes2(short[] data) {
         return findFiducials(toGrayF32Image(data, 512, 424));
+    }
+
+    public static ArrayList<FiducialDetectionResult> findFiducialsFromBytes(short[] data, BufferedImage buf) {
+        GrayF32 f32 = new GrayF32(512, 424);
+        GrayU16 u16 = toGrayU16Image(data, 512, 424);
+        GrayU8 u8 = new GrayU8(512, 424);
+
+//        GThresholdImageOps.threshold(u16, u8, 1200, true);
+        // Select a global threshold using Otsu's method.
+//        double threshold = GThresholdImageOps.computeOtsu(f32, 0, 255);
+        ConvertImage.convert(u16, f32);
+        ConvertBufferedImage.convertTo(u16, buf);
+        return findFiducials(f32);
     }
 
     public static ArrayList<FiducialDetectionResult> findFiducials(GrayF32 original) {
         ArrayList<FiducialDetectionResult> detectionList = new ArrayList<>();
         // Detect the fiducials
         FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(
-                new ConfigFiducialBinary(0.5), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 25), GrayF32.class);
+                new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 25), GrayF32.class);
+//                new ConfigFiducialBinary(0.1), ConfigThresholdLocalOtsu.fixed(0.5),GrayF32.class);
         detector.detect(original);
 
 //        log.info(detector.totalFound() + " fiducials found.");
@@ -56,6 +74,35 @@ public class FiducialFinder {
         return detectionList;
     }
 
+    public static ArrayList<FiducialDetectionResult> findFiducials(GrayU8 original) {
+        ArrayList<FiducialDetectionResult> detectionList = new ArrayList<>();
+        // Detect the fiducials
+        FiducialDetector<GrayU8> detector = FactoryFiducial.squareBinary(
+                new ConfigFiducialBinary(0.5), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 25), GrayU8.class);
+        detector.detect(original);
+
+//        log.info(detector.totalFound() + " fiducials found.");
+        //Iterate over all fiducials found
+
+
+//        System.out.println(detector.totalFound() + " FOUND");
+        for (int i = 0; i < detector.totalFound(); i++) {
+            Polygon2D_F64 bounds = new Polygon2D_F64();
+            Point2D_F64 locationPixel = new Point2D_F64();
+            detector.getCenter(i, locationPixel);
+            detector.getBounds(i, bounds);
+            FiducialDetectionResult fiducialDetectionResult = new FiducialDetectionResult(locationPixel, bounds, detector.getId(i));
+//            System.out.println("ID:" + detector.getId(i));
+            detectionList.add(fiducialDetectionResult);
+//            if (detector.hasUniqueID())
+//                System.out.println("Target ID = " + detector.getId(i));
+//            if (detector.hasMessage())
+//                System.out.println("Message   = " + detector.getMessage(i));
+//            log.debug("2D Image Location = " + locationPixel);
+        }
+
+        return detectionList;
+    }
 
     /**
      * Converts a byte array to a BufferedImage
@@ -116,4 +163,10 @@ public class FiducialFinder {
         return res;
     }
 
+    public static GrayU16 toGrayU16Image(short[] data, int w, int h) {
+        GrayU16 res = new GrayU16(w, h);
+
+        res.data = data;
+        return res;
+    }
 }

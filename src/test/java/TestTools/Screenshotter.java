@@ -160,11 +160,11 @@ public class Screenshotter {
 
     private static void saveDataClicked() {
         if (infra.length > 0) {
-            KinectDataStore.saveInfraredData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\2 Marker " + System.currentTimeMillis() + "ms_infra.bin", infra);
+            KinectDataStore.saveInfraredData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\Marker " + System.currentTimeMillis() + "ms_infra.bin", infra);
             infra = new short[0];
         }
         if (depth != null) {
-            KinectDataStore.saveDepthData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\2 Marker " + System.currentTimeMillis() + "ms_depth.bin", depth);
+            KinectDataStore.saveDepthData("C:\\Users\\Justin\\Desktop\\Kinect Bilder\\Marker " + System.currentTimeMillis() + "ms_depth.bin", depth);
             depth = null;
         }
     }
