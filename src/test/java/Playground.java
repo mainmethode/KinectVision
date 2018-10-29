@@ -237,9 +237,7 @@ public class Playground {
         return angle;
     }
 
-    @Test
-    public void visualizeEverything() {
-        //TODO Add real values
+    private double calculateS() {
         //Human
         double tM = 0.033; //seconds
         double vMaxM = 1.600; //meters per second
@@ -257,6 +255,12 @@ public class Playground {
         double zR = 0;
         //Security distance
         double S = sH + sR + sS + C + zD + zR;
+        return S;
+    }
+
+    @Test
+    public void visualizeEverything() {
+        double S = calculateS();
 
         //Set up mqtt client for kinect
         KinectClient kinectClient = new KinectClient();

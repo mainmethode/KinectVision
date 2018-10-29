@@ -20,13 +20,13 @@ public class RobotClient implements RobotHandler {
     }
 
     @Override
-    public void onPositionEvent(Object o) {
-
+    public void onAxisData(double[] angles) {
+        robot.setAngles(angles);
     }
 
     @Override
-    public void onAxisData(double[] angles) {
-        robot.setAngles(angles);
+    public void setAxis(int i, double axisValue) {
+        robot.getAngles()[i] = axisValue;
     }
 
     public void stopRobot() {
