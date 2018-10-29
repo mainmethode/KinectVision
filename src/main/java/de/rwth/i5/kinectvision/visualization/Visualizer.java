@@ -8,12 +8,15 @@ import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.robot.Robot;
 
+import javax.imageio.ImageIO;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Visualizer {
@@ -34,12 +37,18 @@ public class Visualizer {
         panel.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    scale += 10;
-                    tx += (300 - e.getX()) / 5;
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    scale -= 10;
-                    tx += (300 - e.getX()) / 5;
+//                if (e.getButton() == MouseEvent.BUTTON1) {
+//                    scale += 10;
+//                    tx += (300 - e.getX()) / 5;
+//                } else if (e.getButton() == MouseEvent.BUTTON3) {
+//                    scale -= 10;
+//                    tx += (300 - e.getX()) / 5;
+//                }
+                File outputfile = new File("C:\\Users\\Justin\\Desktop\\SCREENIES\\image" + maxX++ + ".png");
+                try {
+                    ImageIO.write(buf, "png", outputfile);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
                 }
             }
 
@@ -112,12 +121,13 @@ public class Visualizer {
 
         //Show marker positions
         g.setColor(Color.BLUE);
-        for (Marker3d marker3d : robot.getBases()) {
-            if (Math.abs(marker3d.getPosition().x) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().y) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().z) != Double.POSITIVE_INFINITY) {
-                g.fillRect(convertValue(marker3d.getPosition().x) - markerSize / 2, convertValue(marker3d.getPosition().z) - markerSize / 2, markerSize, markerSize);
+        if (robot != null)
+            for (Marker3d marker3d : robot.getBases()) {
+                if (Math.abs(marker3d.getPosition().x) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().y) != Double.POSITIVE_INFINITY && Math.abs(marker3d.getPosition().z) != Double.POSITIVE_INFINITY) {
+                    g.fillRect(convertValue(marker3d.getPosition().x) - markerSize / 2, convertValue(marker3d.getPosition().z) - markerSize / 2, markerSize, markerSize);
 //                g.drawImage(cross, convertValue(marker3d.getPosition().x) - 2, convertValue(marker3d.getPosition().z) - 2, null);
+                }
             }
-        }
         g.setColor(Color.GREEN);
         if (polygonMesh != null) {
             if (polygonMesh.getMarker1() != null) {

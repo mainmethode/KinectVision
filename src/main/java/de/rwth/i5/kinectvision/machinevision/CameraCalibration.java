@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.vecmath.Vector3d;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +34,12 @@ public class CameraCalibration {
      *
      * @param infraredData Infrared frame data
      * @param depthData    Depth frame data
+     * @param buf
      * @return A list containing all found and 3D-matched markers.
      */
-    public static ArrayList<Marker3d> generate3dMarkers(short[] infraredData, DepthModel depthData) {
+    public static ArrayList<Marker3d> generate3dMarkers(short[] infraredData, DepthModel depthData, BufferedImage buf) {
         //Detect markers in the infrared image
-        ArrayList<FiducialDetectionResult> detectionResult = FiducialFinder.findFiducialsFromBytes(infraredData);
+        ArrayList<FiducialDetectionResult> detectionResult = FiducialFinder.findFiducialsFromBytes(infraredData, buf);
 //        log.debug("Found " + detectionResult.size() + " markers.");
         ArrayList<Marker3d> res = new ArrayList<>();
         int x_rw, y_rw;
@@ -71,7 +73,7 @@ public class CameraCalibration {
             return true;
         }
         //Check for markers
-        ArrayList<Marker3d> calibrationMarkers = generate3dMarkers(infraredData, depthData);
+        ArrayList<Marker3d> calibrationMarkers = generate3dMarkers(infraredData, depthData, null);
         //Check if there are no duplicates in the arraylist
         if (hasDuplicates(calibrationMarkers)) {
             log.error("Marker list has duplicates");
@@ -81,7 +83,7 @@ public class CameraCalibration {
         //Add every marker to the calibration result list
         for (Marker3d calibrationMarker : calibrationMarkers) {
             //If there is no arraylist yet for the marker we create one
-            calibrations.computeIfAbsent(calibrationMarker.getId(), k -> new ArrayList<Marker3d>());
+            calibrations.computeIfAbsent(calibrationMarker.getId(), k -> new ArrayList<>());
             //Add the marker to its ID list
             calibrations.get(calibrationMarker.getId()).add(calibrationMarker);
         }

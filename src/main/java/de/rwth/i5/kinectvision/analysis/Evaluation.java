@@ -1,12 +1,13 @@
 package de.rwth.i5.kinectvision.analysis;
 
+import de.rwth.i5.kinectvision.Counter;
 import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
-import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
+import de.rwth.i5.kinectvision.robot.RobotClient;
 import de.rwth.i5.kinectvision.visualization.Visualizer;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NonNull;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 
@@ -21,21 +22,23 @@ public class Evaluation {
     /**
      * The robot
      */
-    @Setter
-    Robot robot;
+    private Robot robot;
 
-    ArrayList<Vector3d> humanPoints;
-    Visualizer visualizer = new Visualizer();
-    PolygonMesh currentRobot;
-    ArrayList<BoundingSphere> currentSpheres;
-    Vector3d nearestHum, nearestRob;
-    SwevaClient swevaClient;
-    double distance = Double.POSITIVE_INFINITY;
+    private ArrayList<Vector3d> humanPoints;
+    private Visualizer visualizer = new Visualizer();
+    private ArrayList<BoundingSphere> currentSpheres;
+    private Vector3d nearestHum, nearestRob;
+    private SwevaClient swevaClient;
+    private RobotClient robotClient;
+    private double distance = Double.POSITIVE_INFINITY;
+    private double distanceThreshold;
 
-    public Evaluation() {
+    public Evaluation(@NonNull RobotClient robotClient, @NonNull Robot robot, double distanceThreshold) {
+        this.distanceThreshold = distanceThreshold;
+        this.robotClient = robotClient;
+        this.robot = robot;
         swevaClient = new SwevaClient();
         swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
-//        swevaClient.setBroker("ws://127.0.0.1:9001");
         swevaClient.setClientId("blablabla");
         try {
             swevaClient.initialize();
@@ -46,18 +49,32 @@ public class Evaluation {
 
     public void evaluate(ArrayList<Vector3d> humanPoints) {
         this.humanPoints = humanPoints;
-//        this.currentRobot = robot.getCurrentRealWorldModel();
         currentSpheres = robot.transformRobot();
-        distance = checkDistance(humanPoints);
-        visualize();
-        /*
-        Check if the human is too close to the robot's bounding box
-         */
+        distance = calculateMinDistance(humanPoints);
+//        System.out.println(System.currentTimeMillis() - Counter.time);
+//        System.out.println("A: " + System.currentTimeMillis());
+        if (distance < distanceThreshold) {
 
-        //if(humanPoints.distance(robot)):... TODO
+            robotClient.stopRobot();
+
+
+            /*
+             ArrayList<Long> times = new ArrayList<Long>();
+                    times.add(System.currentTimeMillis());
+                if (times.size() == 50) {
+        for (Long time : times) {
+            System.out.println(time);
+        }
+    }
+             */
+
+        }
+        visualizer.visualizeHumans(humanPoints, null, null, null, null, null);
+//        visualize();
+
     }
 
-    private double checkDistance(ArrayList<Vector3d> humanPoints) {
+    private double calculateMinDistance(ArrayList<Vector3d> humanPoints) {
         if (currentSpheres == null || humanPoints == null) return Double.POSITIVE_INFINITY;
         double min = Double.POSITIVE_INFINITY;
         for (Vector3d humanPoint : humanPoints) {
@@ -68,12 +85,9 @@ public class Evaluation {
                     nearestHum = humanPoint;
                     nearestRob = currentSphere.getCenter();
                 }
-//                min = Math.min(calculateDist(humanPoint, currentSphere), min);
             }
         }
-//        for (Triangle triangle : currentRobot) {
-//
-//        }
+        System.out.println(System.currentTimeMillis() - Counter.time);
         return min;
     }
 
@@ -84,14 +98,11 @@ public class Evaluation {
         return distVec.length() - boundingSphere.getRadius();
     }
 
-    public void visualize() {
-
+    private void visualize() {
         try {
             swevaClient.publish(robot, currentSpheres, humanPoints, this.distance);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        //Send to MQTT
-//        visualizer.visualizeHumans(humanPoints, currentRobot, robot, currentSpheres, nearestRob, nearestHum);
     }
 }

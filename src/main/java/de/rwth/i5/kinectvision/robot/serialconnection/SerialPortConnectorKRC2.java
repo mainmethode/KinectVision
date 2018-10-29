@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * Class for handling the connection to a KUKA KR C2 controller using the RS232 serial port.
  */
-public class SerialPortConnectorKRC2 {
+public class SerialPortConnectorKRC2 implements RobotConnector {
     @Setter
     @Getter
     private RobotHandler robotHandler;
@@ -75,11 +75,23 @@ public class SerialPortConnectorKRC2 {
         serialPort.openPort();
     }
 
+    @Override
+    public void stopRobot() {
+
+    }
+
+    @Override
+    public void continueRobot() {
+
+    }
+
+
     /**
      * Sends data to the robot
      *
      * @param o The data which has to sent.
      */
+    @Override
     public void sendData(Object o) {
 
     }

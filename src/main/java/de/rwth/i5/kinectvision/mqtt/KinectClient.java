@@ -1,6 +1,7 @@
 package de.rwth.i5.kinectvision.mqtt;
 
 
+import de.rwth.i5.kinectvision.Counter;
 import de.rwth.i5.kinectvision.machinevision.FrameHandler;
 import de.rwth.i5.kinectvision.machinevision.FrameSource;
 import de.rwth.i5.kinectvision.machinevision.model.DepthModel;
@@ -27,6 +28,7 @@ public class KinectClient implements FrameSource {
     private String broker;
     @Setter
     private String clientId;
+
 
     private static FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
@@ -99,11 +101,22 @@ public class KinectClient implements FrameSource {
              */
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+
+//                try {
+////                    System.out.println("send");
+//                    MqttTopic mqttTopic = kinectClient.getTopic("ping");
+//                    mqttTopic.publish(mqttMessage);
+////                    kinectClient.publish(mqttTopic, "1".getBytes(), 0, false);
+////                    System.out.println("sent.");
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
                 if (mqttMessage == null || mqttMessage.getPayload() == null)
                     return;
 
                 //Decompress the payload
-                byte[] payload = decompress(mqttMessage.getPayload());
+//                byte[] payload = decompress(mqttMessage.getPayload());
+                byte[] payload = mqttMessage.getPayload();
 //                log.debug("Message arrived. Topic: {}, message: {}", topic, mqttMessage.toString());
 
                 switch (topic) {
@@ -112,6 +125,7 @@ public class KinectClient implements FrameSource {
 //                        log.debug("Depth frame");
                         //Deserialize
                         DepthModel depth = (DepthModel) conf.asObject(payload);
+                        Counter.time = System.currentTimeMillis();
                         //Handle
                         frameHandler.onDepthFrame(depth);
                         break;

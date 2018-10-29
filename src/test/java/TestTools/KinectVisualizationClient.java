@@ -111,7 +111,7 @@ public class KinectVisualizationClient {
 //                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
 //                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
                 ConvertBufferedImage.convertFrom(buf, gray);
-                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(gray);
+                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(gray, null);
 
 
 

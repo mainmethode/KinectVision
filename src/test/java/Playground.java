@@ -13,7 +13,6 @@ import de.rwth.i5.kinectvision.mqtt.KinectHandler;
 import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
-import de.rwth.i5.kinectvision.robot.RobotModel;
 import edu.ufl.digitalworlds.j4k.DepthMap;
 import georegression.struct.point.Point3D_F32;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -240,40 +239,55 @@ public class Playground {
 
     @Test
     public void visualizeEverything() {
+        //TODO Add real values
+        //Human
+        double tM = 0.033; //seconds
+        double vMaxM = 1.600; //meters per second
+        double sH = tM * vMaxM;
+        //Robot
+        double tR = 0.05;
+        double tS = 0.05;
+        double vMaxR = 1;
+        double sR = tR * vMaxR;
+        double sS = tS * vMaxR;
+        //Parameter C
+        double C = 0;
+        //Uncertainty
+        double zD = 0;
+        double zR = 0;
+        //Security distance
+        double S = sH + sR + sS + C + zD + zR;
+
         //Set up mqtt client for kinect
         KinectClient kinectClient = new KinectClient();
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("asdf");
-//        kinectClient.setDepthTopic("asdf");
-
 
         //Set the frame handler
         KinectHandler handler = new KinectHandler();
         kinectClient.setFrameHandler(handler);
 
-
-
         /*
         Initialize the RobotClient
          */
-//        RobotClient robotClient = new RobotClient();
-
         Robot robot = new Robot();
-        RobotModel robotModel;
         robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
         handler.setRobot(robot);
         /*
          * Initialize the evaluator
          */
         System.out.println("GUTEN TAG");
-        Evaluation evaluation = new Evaluation();
-        evaluation.setRobot(robot);
+
+
+        RobotSimulationClient robotSimulationClient = new RobotSimulationClient();
+
+        RobotClient robotClient = new RobotClient(robot, robotSimulationClient);
+        robotSimulationClient.setRobotClient(robotClient);
+
+        Evaluation evaluation = new Evaluation(robotClient, robot, S);
         handler.setEvaluation(evaluation);
 
-        RobotClient robotClient = new RobotClient();
-        robotClient.setRobot(robot);
 
-        RobotSimulationClient robotSimulationClient = new RobotSimulationClient(robotClient);
         robotSimulationClient.startSimulation();
         try {
 //        Connect to kinect
@@ -316,13 +330,13 @@ public class Playground {
 //        RobotClient robotClient = new RobotClient();
 
         Robot robot = new Robot();
-        RobotModel robotModel;
         robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
 
-        RobotClient robotClient = new RobotClient();
-        robotClient.setRobot(robot);
 
-        RobotSimulationClient robotSimulationClient = new RobotSimulationClient(robotClient);
+        RobotSimulationClient robotSimulationClient = new RobotSimulationClient();
+        RobotClient robotClient = new RobotClient(robot, robotSimulationClient);
+        robotSimulationClient.setRobotClient(robotClient);
+
         robotSimulationClient.startSimulation();
 //        Visualizer visualizer = new Visualizer();
 

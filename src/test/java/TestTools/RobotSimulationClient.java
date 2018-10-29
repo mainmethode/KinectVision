@@ -1,23 +1,24 @@
 package TestTools;
 
 import de.rwth.i5.kinectvision.robot.RobotClient;
+import de.rwth.i5.kinectvision.robot.serialconnection.RobotConnector;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Generates fake serial data with positions
  */
-public class RobotSimulationClient {
+public class RobotSimulationClient implements RobotConnector {
     @Getter
     private double[] angles = new double[]{0, 0, 0, 0, 0, 0};
+    @Setter
     private RobotClient robotClient;
     private int axis = 0;
     private int degree = 0;
     private boolean dir;
     int counter = 0;
 
-    public RobotSimulationClient(RobotClient robotClient) {
-        this.robotClient = robotClient;
-    }
+    private boolean halt = false;
 
     public void startSimulation() {
         new Thread(() -> {
@@ -27,7 +28,8 @@ public class RobotSimulationClient {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                changeAxisRandomly();
+                if (!halt)
+                    changeAxisRandomly();
                 //TODO: Which format?
                 robotClient.onAxisData(angles);
 //                for (double angle : angles) {
@@ -91,5 +93,21 @@ public class RobotSimulationClient {
             }
             return angles[axis] == degree;
         }
+    }
+
+
+    @Override
+    public void stopRobot() {
+        halt = true;
+    }
+
+    @Override
+    public void continueRobot() {
+        halt = false;
+    }
+
+    @Override
+    public void sendData(Object o) {
+
     }
 }
