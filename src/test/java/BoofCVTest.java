@@ -24,7 +24,7 @@ public class BoofCVTest {
         }
         GrayF32 grayF32 = new GrayF32(input.getWidth(), input.getHeight());
         ConvertBufferedImage.convertFrom(input, grayF32);
-        ArrayList<FiducialDetectionResult> testObj = FiducialFinder.findFiducials(grayF32);
+        ArrayList<FiducialDetectionResult> testObj = FiducialFinder.findFiducials(grayF32, null);
         System.out.println(testObj.size());
         System.out.println(testObj.get(0).getId());
 

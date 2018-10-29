@@ -239,24 +239,37 @@ public class Playground {
 
     @Test
     public void visualizeEverything() {
+        //TODO Add real values
+        //Human
+        double tM = 0.033; //seconds
+        double vMaxM = 1.600; //meters per second
+        double sH = tM * vMaxM;
+        //Robot
+        double tR = 0.05;
+        double tS = 0.05;
+        double vMaxR = 1;
+        double sR = tR * vMaxR;
+        double sS = tS * vMaxR;
+        //Parameter C
+        double C = 0;
+        //Uncertainty
+        double zD = 0;
+        double zR = 0;
+        //Security distance
+        double S = sH + sR + sS + C + zD + zR;
+
         //Set up mqtt client for kinect
         KinectClient kinectClient = new KinectClient();
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("asdf");
-//        kinectClient.setDepthTopic("asdf");
-
 
         //Set the frame handler
         KinectHandler handler = new KinectHandler();
         kinectClient.setFrameHandler(handler);
 
-
-
         /*
         Initialize the RobotClient
          */
-//        RobotClient robotClient = new RobotClient();
-
         Robot robot = new Robot();
         robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
         handler.setRobot(robot);
@@ -271,7 +284,7 @@ public class Playground {
         RobotClient robotClient = new RobotClient(robot, robotSimulationClient);
         robotSimulationClient.setRobotClient(robotClient);
 
-        Evaluation evaluation = new Evaluation(robotClient, robot);
+        Evaluation evaluation = new Evaluation(robotClient, robot, S);
         handler.setEvaluation(evaluation);
 
 

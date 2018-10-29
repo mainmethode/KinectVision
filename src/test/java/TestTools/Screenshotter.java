@@ -111,7 +111,7 @@ public class Screenshotter {
 //                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducialsFromBytes(data);
 //                GrayF32 gray = new GrayF32(buf.getWidth(), buf.getHeight());
                 ConvertBufferedImage.convertFrom(buf, gray);
-                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(denoised);
+                ArrayList<FiducialDetectionResult> det = FiducialFinder.findFiducials(denoised, null);
 
 
                 ConvertBufferedImage.convertTo(denoised, buf);

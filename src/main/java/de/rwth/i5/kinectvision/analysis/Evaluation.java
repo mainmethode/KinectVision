@@ -1,5 +1,6 @@
 package de.rwth.i5.kinectvision.analysis;
 
+import de.rwth.i5.kinectvision.Counter;
 import de.rwth.i5.kinectvision.machinevision.model.BoundingSphere;
 import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
@@ -30,9 +31,10 @@ public class Evaluation {
     private SwevaClient swevaClient;
     private RobotClient robotClient;
     private double distance = Double.POSITIVE_INFINITY;
-    private double distanceThreshold = 1.0;
+    private double distanceThreshold;
 
-    public Evaluation(@NonNull RobotClient robotClient, @NonNull Robot robot) {
+    public Evaluation(@NonNull RobotClient robotClient, @NonNull Robot robot, double distanceThreshold) {
+        this.distanceThreshold = distanceThreshold;
         this.robotClient = robotClient;
         this.robot = robot;
         swevaClient = new SwevaClient();
@@ -49,10 +51,26 @@ public class Evaluation {
         this.humanPoints = humanPoints;
         currentSpheres = robot.transformRobot();
         distance = calculateMinDistance(humanPoints);
+//        System.out.println(System.currentTimeMillis() - Counter.time);
+//        System.out.println("A: " + System.currentTimeMillis());
         if (distance < distanceThreshold) {
+
             robotClient.stopRobot();
+
+
+            /*
+             ArrayList<Long> times = new ArrayList<Long>();
+                    times.add(System.currentTimeMillis());
+                if (times.size() == 50) {
+        for (Long time : times) {
+            System.out.println(time);
         }
-        visualize();
+    }
+             */
+
+        }
+        visualizer.visualizeHumans(humanPoints, null, null, null, null, null);
+//        visualize();
 
     }
 
@@ -69,6 +87,7 @@ public class Evaluation {
                 }
             }
         }
+        System.out.println(System.currentTimeMillis() - Counter.time);
         return min;
     }
 

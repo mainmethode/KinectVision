@@ -29,7 +29,7 @@ public class Application {
         /*
         Initialize the RobotClient
          */
-        RobotClient robotClient = new RobotClient();
+        RobotClient robotClient = new RobotClient(null, null);
 
         //Generate the robot
         Robot robot = new Robot();
@@ -38,8 +38,7 @@ public class Application {
         /*
          * Initialize the evaluator
          */
-        Evaluation evaluation = new Evaluation();
-        evaluation.setRobot(robot);
+        Evaluation evaluation = new Evaluation(null, null, 0);
         handler.setEvaluation(evaluation);
         try {
             //Connect to kinect

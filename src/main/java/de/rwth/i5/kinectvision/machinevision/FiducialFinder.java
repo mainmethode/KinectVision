@@ -15,6 +15,7 @@ import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 @Slf4j
 public class FiducialFinder {
     public static ArrayList<FiducialDetectionResult> findFiducialsFromBytes2(short[] data) {
-        return findFiducials(toGrayF32Image(data, 512, 424));
+        return findFiducials(toGrayF32Image(data, 512, 424), null);
     }
 
     public static ArrayList<FiducialDetectionResult> findFiducialsFromBytes(short[] data, BufferedImage buf) {
@@ -40,10 +41,10 @@ public class FiducialFinder {
 //        double threshold = GThresholdImageOps.computeOtsu(f32, 0, 255);
         ConvertImage.convert(u16, f32);
         ConvertBufferedImage.convertTo(u16, buf);
-        return findFiducials(f32);
+        return findFiducials(f32, buf);
     }
 
-    public static ArrayList<FiducialDetectionResult> findFiducials(GrayF32 original) {
+    public static ArrayList<FiducialDetectionResult> findFiducials(GrayF32 original, BufferedImage bufferedImage) {
         ArrayList<FiducialDetectionResult> detectionList = new ArrayList<>();
         // Detect the fiducials
         FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(
@@ -64,6 +65,12 @@ public class FiducialFinder {
             FiducialDetectionResult fiducialDetectionResult = new FiducialDetectionResult(locationPixel, bounds, detector.getId(i));
 //            System.out.println("ID:" + detector.getId(i));
             detectionList.add(fiducialDetectionResult);
+            if (bufferedImage != null) {
+                Graphics graphics = bufferedImage.getGraphics();
+                graphics.setColor(Color.WHITE);
+                graphics.fillRect(((int) fiducialDetectionResult.getCenter().x) - 1, ((int) fiducialDetectionResult.getCenter().y) - 1, 2, 2);
+//                bufferedImage.setRGB(((int) fiducialDetectionResult.getCenter().x), ((int) fiducialDetectionResult.getCenter().y), Color.RED.getRGB());
+            }
 //            if (detector.hasUniqueID())
 //                System.out.println("Target ID = " + detector.getId(i));
 //            if (detector.hasMessage())

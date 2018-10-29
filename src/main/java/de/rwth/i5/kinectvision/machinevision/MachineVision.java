@@ -25,6 +25,7 @@ public class MachineVision {
                 res.add(new Vector3d(x, y, z));
             }
         }
+
 //        System.out.println(res.size());
         return res;
     }
