@@ -74,24 +74,45 @@ public class Robot {
 
             //Achse finden
             Axis axis = robotModel.findAxis(i);
-            //Startpunkt der Achse gibt Rotationspunkt an
-            Vector3d rotOrigin = new Vector3d(axis.getStart());
-            Triangle.transformVector(rotationMatrix, rotOrigin);
-            //Rotationsvektor Achse start bis Achse ende
-            Vector3d rotAxis = new Vector3d();
-            Vector3d rotEnd = new Vector3d(axis.getEnd());
-            Triangle.transformVector(rotationMatrix, rotEnd);
-            rotAxis.sub(rotEnd, rotOrigin);
-            //Winkel nach Achse
-            double angle = Math.toRadians(angles[i]);
-            //Rotationsmatrix_achse = Rotation um Achse
-            Matrix4d rotationMatrixAxis = rotationMatrixArbitraryAxisFromPoint(angle, rotAxis, rotOrigin);
-            //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
-            rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
-            //Transformiere Part mit Rotation_gesamt
-            res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
-        }
 
+            //If axis is rotation axis
+            if (axis.isRotation()) {
+                //Startpunkt der Achse gibt Rotationspunkt an
+                Vector3d rotOrigin = new Vector3d(axis.getStart());
+                Triangle.transformVector(rotationMatrix, rotOrigin);
+                //Rotationsvektor Achse start bis Achse ende
+                Vector3d rotAxis = new Vector3d();
+                Vector3d rotEnd = new Vector3d(axis.getEnd());
+                Triangle.transformVector(rotationMatrix, rotEnd);
+                rotAxis.sub(rotEnd, rotOrigin);
+                //Winkel nach Achse
+                double angle = Math.toRadians(angles[i]);
+                //Rotationsmatrix_achse = Rotation um Achse
+                Matrix4d rotationMatrixAxis = rotationMatrixArbitraryAxisFromPoint(angle, rotAxis, rotOrigin);
+                //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
+                rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
+                //Transformiere Part mit Rotation_gesamt
+                res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
+            } else {
+                //Startpunkt der Achse gibt Rotationspunkt an
+                Vector3d rotOrigin = new Vector3d(axis.getStart());
+                Triangle.transformVector(rotationMatrix, rotOrigin);
+                //Rotationsvektor Achse start bis Achse ende
+                Vector3d rotEnd = new Vector3d(axis.getEnd());
+                Triangle.transformVector(rotationMatrix, rotEnd);
+                rotEnd.normalize();
+                double length = Math.toRadians(angles[i]);
+                rotEnd.scale(length);
+                //Winkel nach Achse
+
+                //Rotationsmatrix_achse = Rotation um Achse
+                Matrix4d rotationMatrixAxis = generateTranslationMatrix(rotOrigin, rotEnd);
+                //Rotation_gesamt = Rotationsmatrix_achse * Rotation_gesamt
+                rotationMatrix.mul(rotationMatrixAxis, rotationMatrix);
+                //Transformiere Part mit Rotation_gesamt
+                res.addAll(BoundingSphere.transform(rotationMatrix, part.getBoundingSpheres()));
+            }
+        }
         return res;
     }
 

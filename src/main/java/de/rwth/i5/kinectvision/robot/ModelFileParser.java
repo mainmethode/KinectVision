@@ -182,7 +182,7 @@ public class ModelFileParser {
         String[] splitted = name.split("_");
         Vector3d position = parseTranslationString(translation);
         int index = Integer.parseInt(splitted[1]);
-        robotModel.addAxis(index, splitted[2].equals("start"), position);
+        robotModel.addAxis(index, splitted[2].equals("start"), position, !splitted[3].equals("tr"));
         log.info("Axis generated." + position);
     }
 

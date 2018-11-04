@@ -69,8 +69,8 @@ public class Evaluation {
              */
 
         }
-        visualizer.visualizeHumans(humanPoints, null, null, null, null, null);
-//        visualize();
+//        visualizer.visualizeHumans(humanPoints, null, null, null, null, null);
+        visualize();
 
     }
 

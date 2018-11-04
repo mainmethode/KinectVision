@@ -50,11 +50,12 @@ public class RobotModel {
     /**
      * Adds a new position to the axes array
      *
-     * @param index    The index of the axis
-     * @param start    True if it is a start vector, false if end
-     * @param position The position to be set
+     * @param index      The index of the axis
+     * @param start      True if it is a start vector, false if end
+     * @param position   The position to be set
+     * @param isRotation true if the axis is a rotation axis
      */
-    public void addAxis(int index, boolean start, Vector3d position) {
+    public void addAxis(int index, boolean start, Vector3d position, boolean isRotation) {
         Axis axis = findAxis(index);
 
         if (axis == null) {
@@ -68,6 +69,7 @@ public class RobotModel {
         } else {
             axis.setEnd(position);
         }
+        axis.setRotation(isRotation);
     }
 
     /**

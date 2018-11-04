@@ -75,7 +75,7 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
 
     @Override
     public void stopRobot() {
-
+//        serialPort.writeBytes(ByteBu, 4);
     }
 
     @Override

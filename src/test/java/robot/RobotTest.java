@@ -195,16 +195,16 @@ public class RobotTest {
         arm0.setName("arm_0");
         arm0.getBoundingSpheres().add(boundingSphere1);
 
-        robotModel.addAxis(0, true, new Vector3d(0, 0, 1));
-        robotModel.addAxis(0, false, new Vector3d(1, 0, 1));
+        robotModel.addAxis(0, true, new Vector3d(0, 0, 1), true);
+        robotModel.addAxis(0, false, new Vector3d(1, 0, 1), true);
 
         RobotPart arm1 = new RobotPart();
         BoundingSphere boundingSphere2 = new BoundingSphere(new Vector3d(0, 0, 4), 1);
         arm1.setName("arm_1");
         arm1.getBoundingSpheres().add(boundingSphere2);
 
-        robotModel.addAxis(1, true, new Vector3d(0, 0, 3));
-        robotModel.addAxis(1, false, new Vector3d(0, 1, 3));
+        robotModel.addAxis(1, true, new Vector3d(0, 0, 3), true);
+        robotModel.addAxis(1, false, new Vector3d(0, 1, 3), true);
 
 
         robotModel.addRobotPart(base);

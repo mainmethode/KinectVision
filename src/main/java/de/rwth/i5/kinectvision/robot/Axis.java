@@ -10,4 +10,9 @@ import javax.vecmath.Vector3d;
 public class Axis {
     private Vector3d start, end;
     private int axisNumber;
+    private boolean rotation;
+
+    public boolean isRotation() {
+        return rotation;
+    }
 }
