@@ -46,6 +46,7 @@ public class FiducialFinder {
 
     public static ArrayList<FiducialDetectionResult> findFiducials(GrayF32 original, BufferedImage bufferedImage) {
         ArrayList<FiducialDetectionResult> detectionList = new ArrayList<>();
+
         // Detect the fiducials
         FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(
                 new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_MEAN, 25), GrayF32.class);

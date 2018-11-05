@@ -1,6 +1,9 @@
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import de.rwth.i5.kinectvision.robot.serialconnection.RobotHandler;
+import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortConnectorKRC2;
+import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortException;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
@@ -16,10 +19,31 @@ public class SerialPortPlayground {
 
     public static void main(String[] args) {
 
+        try {
+            SerialPortConnectorKRC2 connectorKRC2 = new SerialPortConnectorKRC2(0);
+            connectorKRC2.setRobotHandler(new RobotHandler() {
+                @Override
+                public void onAxisData(double[] angles) {
+
+                }
+
+                @Override
+                public void setAxis(int i, double axisValue) {
+
+                }
+            });
+            connectorKRC2.connect();
+        } catch (SerialPortException e) {
+            e.printStackTrace();
+        }
+
 //        SerialPort.getCommPorts();
 //        byte[] bytes = new byte[]{(byte) 0xAF, 0xB, 0x1};
 //        System.out.println(DatatypeConverter.printHexBinary(bytes));
 //        System.out.println(bytesToHex(bytes));
+        if (true) {
+            return;
+        }
         printPortNames();
         SerialPort[] comPorts = SerialPort.getCommPorts();
         if (comPorts.length == 0) {

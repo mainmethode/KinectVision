@@ -75,7 +75,7 @@ public class Visualizer {
     }
 
     private double maxZ = 0;
-    int sc = 70;
+    int sc = 40;
 
     public void visualizeHumans(ArrayList<Vector3d> humans, PolygonMesh polygonMesh, Robot robot, ArrayList<BoundingSphere> spheres, Vector3d nearestRob, Vector3d nearestHum) {
         g.setStroke(normal);
@@ -156,7 +156,7 @@ public class Visualizer {
         g.setColor(Color.YELLOW);
         if (spheres != null)
             for (BoundingSphere boundingSphere : spheres) {
-                g.fillOval(convertValue1(boundingSphere.getCenter().x - boundingSphere.getRadius()), 1000 - convertValue1(boundingSphere.getCenter().z + boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * sc * 2)), ((int) (boundingSphere.getRadius() * sc * 2)));
+                g.fillOval(convertValue1(boundingSphere.getCenter().x - boundingSphere.getRadius()), convertValue1(boundingSphere.getCenter().y - boundingSphere.getRadius()), ((int) (boundingSphere.getRadius() * sc * 2)), ((int) (boundingSphere.getRadius() * sc * 2)));
             }
         panel.setBufferedImage(buf);
     }

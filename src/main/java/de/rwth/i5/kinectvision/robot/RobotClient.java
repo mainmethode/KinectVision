@@ -21,6 +21,7 @@ public class RobotClient implements RobotHandler {
 
     @Override
     public void onAxisData(double[] angles) {
+        angles[0] = angles[0] / 1000;
         robot.setAngles(angles);
     }
 

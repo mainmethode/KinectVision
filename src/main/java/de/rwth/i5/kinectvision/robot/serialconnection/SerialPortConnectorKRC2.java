@@ -43,6 +43,7 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
             throw new SerialPortException("Port number out of range.");
         }
         serialPort = comPorts[portNumber];
+        System.out.println(serialPort.toString());
     }
 
     /**
@@ -64,13 +65,11 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
         return wrappedNumber.getInt();
     }
 
-    /**
-     * Connect with the controller using default parameters.
-     *
-     * @throws SerialPortException If connection does not work.
-     */
-    public void connect() throws SerialPortException {
-        connect(PARITY, BAUD, DATA_BITS, STOP_BITS, FLOW_CONTROL);
+    public static void printPortNames() {
+        SerialPort[] ports = SerialPort.getCommPorts();
+        for (SerialPort port : ports) {
+            System.out.println(port.toString());
+        }
     }
 
     @Override
@@ -80,6 +79,25 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
 
     @Override
     public void continueRobot() {
+
+    }
+
+    /**
+     * Connect with the controller using default parameters.
+     *
+     * @throws SerialPortException If connection does not work.
+     */
+    public void connect() throws SerialPortException {
+        connect(BAUD, PARITY, DATA_BITS, STOP_BITS, FLOW_CONTROL);
+    }
+
+    /**
+     * Sends data to the robot
+     *
+     * @param o The data which has to sent.
+     */
+    @Override
+    public void sendData(Object o) {
 
     }
 
@@ -142,7 +160,7 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
                             int axisNumber = convertNumber(event.getReceivedData(), i);
                             double axisValue = convertNumber(event.getReceivedData(), i + 5) / 100000.0;
 
-                            log.debug("Axis " + axisNumber + ": " + axisValue + (axisNumber == 7 ? "mm" : "°"));
+//                            log.debug("Axis " + axisNumber + ": " + axisValue + (axisNumber == 1 ? "mm" : "°"));
 //                            System.out.println("Axis " + axisNumber + ": " + axisValue + (axisNumber == 7 ? "mm" : "°"));
                             if (axisNumber > 7 || axisNumber < 0) {
                                 log.warn("Wrong axis number " + axisNumber);
@@ -167,17 +185,7 @@ public class SerialPortConnectorKRC2 implements RobotConnector {
         serialPort.setBaudRate(baud);
         serialPort.setNumDataBits(dataBits);
         serialPort.setNumStopBits(stopBits);
-        serialPort.setFlowControl(flowControl);
+        serialPort.setFlowControl(SerialPort.FLOW_CONTROL_XONXOFF_OUT_ENABLED);
         serialPort.openPort();
-    }
-
-    /**
-     * Sends data to the robot
-     *
-     * @param o The data which has to sent.
-     */
-    @Override
-    public void sendData(Object o) {
-
     }
 }
