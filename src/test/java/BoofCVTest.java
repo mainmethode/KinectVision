@@ -18,7 +18,7 @@ public class BoofCVTest {
         // load the lens distortion parameters and the input image
         BufferedImage input = null;
         try {
-            input = UtilImageIO.loadImage(getClass().getResource("tester.png").toURI().getPath());
+            input = UtilImageIO.loadImage(getClass().getResource("fidu_643.png").toURI().getPath());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

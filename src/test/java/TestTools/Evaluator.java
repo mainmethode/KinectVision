@@ -35,9 +35,7 @@ public class Evaluator {
         kinectClient.setBroker("tcp://localhost:1883");
         kinectClient.setClientId("Sample Client");
         buf = new BufferedImage(512, 424, BufferedImage.TYPE_USHORT_GRAY);
-        System.out.println("YO");
         initKinect();
-        System.out.println("YOasd");
     }
 
     private static void initKinect() {
@@ -69,9 +67,9 @@ public class Evaluator {
                 //Infrared frame: Visualize and find markers
                 infra = data;
 
-                if (depth == null) {
-                    return;
-                }
+//                if (depth == null) {
+//                    return;
+//                }
                 ArrayList<Marker3d> markers = null;
 //                if (test) {
                 evaluationTest.testMarkerRecognition(infra, depth, buf);
@@ -108,7 +106,7 @@ public class Evaluator {
                 }
 //                System.out.println(data[x + 512 * y]);
                 Graphics2D g = buf.createGraphics();
-                g.setStroke(new BasicStroke(2));
+                g.setStroke(new BasicStroke(20));
                 g.setColor(Color.GREEN);
 
 

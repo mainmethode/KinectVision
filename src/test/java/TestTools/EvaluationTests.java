@@ -45,23 +45,24 @@ public class EvaluationTests {
         ArrayList<Vector3d> humans = MachineVision.detectHumans(depthModel);
         Graphics graphics = buf.getGraphics();
         graphics.setColor(Color.WHITE);
-        for (int i = 0; i < 512; i++) {
-            for (int j = 0; j < 424; j++) {
-                if (depthModel.getPlayerIndex()[512 * j + i] > 0) {
-                    graphics.fillRect(512 - i + 1, j - 1, 2, 2);
+        if (depthModel != null)
+            for (int i = 0; i < 512; i++) {
+                for (int j = 0; j < 424; j++) {
+                    if (depthModel.getPlayerIndex()[512 * j + i] > 0) {
+                        graphics.fillRect(512 - i + 1, j - 1, 2, 2);
+                    }
                 }
             }
-        }
 
         if (m643 != null) {
             double min = Double.POSITIVE_INFINITY;
 
-
-            for (Vector3d human : humans) {
-                Vector3d len = new Vector3d(m643.getPosition());
-                len.sub(human);
-                min = Math.min(min, len.length());
-            }
+            if (humans != null)
+                for (Vector3d human : humans) {
+                    Vector3d len = new Vector3d(m643.getPosition());
+                    len.sub(human);
+                    min = Math.min(min, len.length());
+                }
 
 //            System.out.println(min);
 

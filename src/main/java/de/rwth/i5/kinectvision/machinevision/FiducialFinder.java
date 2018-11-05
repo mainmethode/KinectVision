@@ -1,6 +1,7 @@
 package de.rwth.i5.kinectvision.machinevision;
 
 import boofcv.abst.fiducial.FiducialDetector;
+import boofcv.alg.filter.basic.GrayImageOps;
 import boofcv.core.image.ConvertImage;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
@@ -40,8 +41,15 @@ public class FiducialFinder {
         // Select a global threshold using Otsu's method.
 //        double threshold = GThresholdImageOps.computeOtsu(f32, 0, 255);
         ConvertImage.convert(u16, f32);
+        GrayF32 bright = new GrayF32(f32.width, f32.height);
+//        GrayImageOps.brighten(f32, 20000, Integer.MAX_VALUE, bright);
+        GrayImageOps.stretch(f32, 10, 2000, Float.POSITIVE_INFINITY, bright);
+//        ConvertBufferedImage.convertTo(u16, buf);
+//        ConvertBufferedImage.convertTo(u16, buf);
+//        bright.setData(f32.data);
+        ConvertImage.convert(bright, u16);
         ConvertBufferedImage.convertTo(u16, buf);
-        return findFiducials(f32, buf);
+        return findFiducials(bright, buf);
     }
 
     public static ArrayList<FiducialDetectionResult> findFiducials(GrayF32 original, BufferedImage bufferedImage) {
@@ -69,7 +77,7 @@ public class FiducialFinder {
             if (bufferedImage != null) {
                 Graphics graphics = bufferedImage.getGraphics();
                 graphics.setColor(Color.WHITE);
-                graphics.fillRect(((int) fiducialDetectionResult.getCenter().x) - 1, ((int) fiducialDetectionResult.getCenter().y) - 1, 2, 2);
+                graphics.fillRect(((int) fiducialDetectionResult.getCenter().x) - 10, ((int) fiducialDetectionResult.getCenter().y) - 10, 20, 20);
 //                bufferedImage.setRGB(((int) fiducialDetectionResult.getCenter().x), ((int) fiducialDetectionResult.getCenter().y), Color.RED.getRGB());
             }
 //            if (detector.hasUniqueID())

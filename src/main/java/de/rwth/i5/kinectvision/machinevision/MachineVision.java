@@ -13,6 +13,7 @@ public class MachineVision {
      * @return Vectors containing human points
      */
     public static ArrayList<Vector3d> detectHumans(DepthModel o) {
+        if (o == null) return null;
         ArrayList<Vector3d> res = new ArrayList<>();
         float x, y, z;
         for (int j = 0; j < 424 * 512; j++) {

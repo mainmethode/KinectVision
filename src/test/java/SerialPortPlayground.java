@@ -1,13 +1,10 @@
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
-import de.rwth.i5.kinectvision.robot.serialconnection.RobotHandler;
-import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortConnectorKRC2;
-import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortException;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 public class SerialPortPlayground {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -18,32 +15,10 @@ public class SerialPortPlayground {
     //Standardwerte
 
     public static void main(String[] args) {
-
-        try {
-            SerialPortConnectorKRC2 connectorKRC2 = new SerialPortConnectorKRC2(0);
-            connectorKRC2.setRobotHandler(new RobotHandler() {
-                @Override
-                public void onAxisData(double[] angles) {
-
-                }
-
-                @Override
-                public void setAxis(int i, double axisValue) {
-
-                }
-            });
-            connectorKRC2.connect();
-        } catch (SerialPortException e) {
-            e.printStackTrace();
-        }
-
 //        SerialPort.getCommPorts();
 //        byte[] bytes = new byte[]{(byte) 0xAF, 0xB, 0x1};
 //        System.out.println(DatatypeConverter.printHexBinary(bytes));
 //        System.out.println(bytesToHex(bytes));
-        if (true) {
-            return;
-        }
         printPortNames();
         SerialPort[] comPorts = SerialPort.getCommPorts();
         if (comPorts.length == 0) {
@@ -56,6 +31,8 @@ public class SerialPortPlayground {
             //Busy waiting...
         }
     }
+
+    static long startTime = 0;
 
     public static void printPortNames() {
         SerialPort[] ports = SerialPort.getCommPorts();
@@ -77,21 +54,27 @@ public class SerialPortPlayground {
             public void serialEvent(SerialPortEvent event) {
                 switch (event.getEventType()) {
                     case SerialPort.LISTENING_EVENT_DATA_AVAILABLE:
-                        byte[] buffer = new byte[serialPort.bytesAvailable()];
-                        int numRead = serialPort.readBytes(buffer, buffer.length);
-//                        byte[] buffer = new byte[4];
-//                        serialPort.readBytes(buffer, 4, 0);
-                        System.out.println("Read " + numRead + " bytes.");
-                        System.out.println("Data available");
-                        System.out.println("Received data: " + DatatypeConverter.printHexBinary(buffer));
+                        System.out.println(System.currentTimeMillis() - startTime);
+                        startTime = System.currentTimeMillis();
+//                        byte[] buffer = new byte[serialPort.bytesAvailable()];
+//                        int numRead = serialPort.readBytes(buffer, buffer.length);
+////                        byte[] buffer = new byte[4];
+////                        serialPort.readBytes(buffer, 4, 0);
+//                        System.out.println("Read " + numRead + " bytes.");
+//                        System.out.println("Data available");
+//                        System.out.println("Received data: " + DatatypeConverter.printHexBinary(buffer));
                         break;
                     case SerialPort.LISTENING_EVENT_DATA_WRITTEN:
                         System.out.println("Data Tx complete");
                         break;
                     case SerialPort.LISTENING_EVENT_DATA_RECEIVED:
 //                        System.out.println(Arrays.toString(event.getReceivedData()));
-                        if (event.getReceivedData().length % 9 != 0)
-                            return;
+                        System.out.println(Arrays.toString(event.getReceivedData()));
+//                        if (event.getReceivedData().length % 9 != 0)
+//                            return;
+                        System.out.println(System.currentTimeMillis() - startTime);
+                        startTime = System.currentTimeMillis();
+                        if (true) return;
 //                        ByteBuffer wrapped = ByteBuffer.wrap(event.getReceivedData()); // big-endian by default
 //                        wrapped.order(ByteOrder.LITTLE_ENDIAN);
                         for (int i = 0; i < event.getReceivedData().length; i += 9) {
@@ -112,7 +95,11 @@ public class SerialPortPlayground {
                             ByteBuffer wrappedValue = ByteBuffer.wrap(axisValueBytes); // big-endian by default
                             wrappedValue.order(ByteOrder.LITTLE_ENDIAN);
                             double axisValue = wrappedValue.getInt() / 100000.0;
-                            System.out.println("Axis " + axisNumber + ": " + axisValue + (axisNumber == 7 ? "mm" : "°"));
+//                            System.out.println("Axis " + axisNumber + ": " + axisValue + (axisNumber == 7 ? "mm" : "°"));
+//                            if (axisNumber == 7) {
+//                                System.out.println(System.currentTimeMillis() - startTime);
+//                                startTime = System.currentTimeMillis();
+//                            }
                         }
 
 //                        System.out.println(number / 1000.0);

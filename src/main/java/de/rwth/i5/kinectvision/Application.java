@@ -61,7 +61,7 @@ public class Application {
         Initialize the Robot
          */
         Robot robot = new Robot();
-        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\test.x3d"));
         handler.setRobot(robot);
         /*
          * Initialize the robot connection

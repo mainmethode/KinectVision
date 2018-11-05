@@ -327,9 +327,6 @@ public class Playground {
 
     @Test
     public void testRobotTransformation() {
-
-
-
         /*
         Initialize the RobotClient
          */
