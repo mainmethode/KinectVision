@@ -34,7 +34,7 @@ public class Robot {
     private RobotModel robotModel;
     @Setter
     @Getter
-    private double[] angles = new double[6];
+    private double[] angles = new double[7];
     @Getter
     private boolean initialized = false;
     @Getter

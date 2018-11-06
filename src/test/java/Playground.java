@@ -10,14 +10,13 @@ import de.rwth.i5.kinectvision.machinevision.model.PolygonMesh;
 import de.rwth.i5.kinectvision.machinevision.model.Triangle;
 import de.rwth.i5.kinectvision.mqtt.KinectClient;
 import de.rwth.i5.kinectvision.mqtt.KinectHandler;
+import de.rwth.i5.kinectvision.mqtt.SwevaClient;
 import de.rwth.i5.kinectvision.robot.Robot;
 import de.rwth.i5.kinectvision.robot.RobotClient;
-import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortConnectorKRC2;
-import de.rwth.i5.kinectvision.robot.serialconnection.SerialPortException;
-import de.rwth.i5.kinectvision.visualization.Visualizer;
 import georegression.struct.point.Point3D_F32;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
@@ -334,22 +333,25 @@ public class Playground {
 
         Robot robot = new Robot();
 //        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\roboter_kugeln_scaled.x3d"));
-        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\test.x3d"));
-        SerialPortConnectorKRC2 connector = null;
-        try {
-            connector = new SerialPortConnectorKRC2(0);
-        } catch (SerialPortException e) {
-            e.printStackTrace();
-            System.err.println("No serial port found.");
-            return;
-        }
+        robot.generateFromFiles(new File("C:\\Users\\Justin\\Desktop\\robotermodell.x3d"));
+//        SerialPortConnectorKRC2 connector = null;
+//        try {
+//            connector = new SerialPortConnectorKRC2(0);
+//        } catch (SerialPortException e) {
+//            e.printStackTrace();
+//            System.err.println("No serial port found.");
+//            return;
+//        }
 
 
-//        RobotSimulationClient robotSimulationClient = new RobotSimulationClient();
-        RobotClient robotClient = new RobotClient(robot, connector);
-//        robotSimulationClient.setRobotClient(robotClient);
+        RobotSimulationClient robotSimulationClient = new RobotSimulationClient();
+        RobotClient robotClient = new RobotClient(robot, robotSimulationClient);
+//        RobotClient robotClient = new RobotClient(robot, connector);
+        robotSimulationClient.setRobotClient(robotClient);
 
-//        robotSimulationClient.startSimulation();
+        robotSimulationClient.startSimulation();
+
+        /*
         connector.setRobotHandler(robotClient);
         try {
             connector.connect();
@@ -358,24 +360,25 @@ public class Playground {
             System.err.println("No connection");
             return;
         }
-        Visualizer visualizer = new Visualizer();
+        */
+//        Visualizer visualizer = new Visualizer();
 
-//        SwevaClient swevaClient = new SwevaClient();
-//        swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
-//        swevaClient.setClientId("blablabla");
-//        try {
-//            swevaClient.initialize();
-//        } catch (MqttException e) {
-//            e.printStackTrace();
-//        }
+        SwevaClient swevaClient = new SwevaClient();
+        swevaClient.setBroker("ws://broker.mqttdashboard.com:8000/mqtt");
+        swevaClient.setClientId("blablabla");
+        try {
+            swevaClient.initialize();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
         while (true) {
             ArrayList<BoundingSphere> spheres = robot.getRobotWithOrientation();
-//            try {
-//                swevaClient.publish(null, spheres, null, 0);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-            visualizer.visualizeRobot(robot, spheres);
+            try {
+                swevaClient.publish(null, spheres, null, 0);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+//            visualizer.visualizeRobot(robot, spheres);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
